@@ -2,466 +2,1634 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>普通话 · Aussprache-Trainer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=DM+Sans:wght@300;400;500&family=DM+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=DM+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:#0e0e10; --bg2:#16161a; --bg3:#1e1e24;
-  --border:rgba(255,255,255,0.08); --text:#e8e6e0; --muted:#6b6975;
-  --accent:#c8a96e; --accent2:#8b6fd4;
-  --green:#5cb87a; --red:#e06b6b; --yellow:#e0c06b;
+  --bg:          #F4F4F2;
+  --bg2:         #FFFFFF;
+  --bg3:         #EBEBEA;
+  --border:      #D0D0CE;
+  --text:        #111111;
+  --text2:       #444444;
+  --muted:       #888888;
+  --red:         #E8001C;
+  --red-dim:     rgba(232,0,28,0.08);
+  --green:       #1A7A3C;
+  --green-light: rgba(26,122,60,0.08);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  height: 100%; overflow: hidden;
+  background: var(--bg); color: var(--text);
+  font-family: 'DM Sans', -apple-system, 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  touch-action: pan-y;
+}
 
-/* TOPBAR */
-.topbar{width:100%;display:flex;align-items:center;padding:16px 24px;border-bottom:1px solid var(--border);gap:10px;position:sticky;top:0;background:var(--bg);z-index:20;flex-wrap:wrap;}
-.topbar-logo{font-family:'Noto Serif SC',serif;font-size:20px;color:var(--accent);}
-.topbar-sub{font-size:11px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;}
-.block-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-left:auto;}
-.block-tab{padding:5px 13px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
-.block-tab:hover{border-color:rgba(255,255,255,.2);color:var(--text);}
-.block-tab.active{color:#0e0e10;font-weight:500;border-color:transparent;}
-.import-btn{padding:5px 13px;border-radius:20px;border:1px dashed rgba(255,255,255,.2);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
-.import-btn:hover{border-color:var(--accent);color:var(--accent);}
+/* ── APP SHELL ── */
+.app {
+  display: flex; flex-direction: column;
+  height: 100vh; height: 100dvh;
+  max-width: 480px; margin: 0 auto;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+  position: relative;
+}
 
-/* MAIN */
-.main{width:100%;max-width:860px;padding:28px 20px 60px;display:flex;flex-direction:column;align-items:center;gap:24px;}
+/* ── HEADER ── */
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px 12px;
+  border-bottom: 2px solid var(--text);
+  flex-shrink: 0; gap: 8px;
+}
+.header-brand {
+  font-size: 15px; font-weight: 800; letter-spacing: -0.02em;
+  color: var(--text); line-height: 1;
+}
+.header-brand small {
+  display: block; font-size: 8px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted); margin-top: 2px;
+}
 
-/* IMPORT PANEL */
-.import-panel{width:100%;background:var(--bg2);border:1px dashed rgba(200,169,110,.3);border-radius:16px;padding:24px;display:none;flex-direction:column;gap:14px;}
-.import-panel.open{display:flex;}
-.import-panel h3{font-size:13px;font-weight:500;color:var(--accent);}
-.import-panel p{font-size:12px;color:var(--muted);line-height:1.6;}
-.import-panel textarea{width:100%;height:120px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:12px;resize:vertical;}
-.import-panel textarea:focus{outline:none;border-color:rgba(200,169,110,.4);}
-.import-actions{display:flex;gap:10px;align-items:center;}
-.btn-primary{padding:8px 18px;background:var(--accent);color:#0e0e10;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
-.btn-primary:hover{opacity:.85;}
-.btn-ghost{padding:8px 18px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;}
-.btn-ghost:hover{color:var(--text);}
-.import-msg{font-size:12px;color:var(--green);display:none;}
-.import-msg.error{color:var(--red);}
+/* ── SET SELECTOR ── */
+.set-selector { position: relative; }
+.set-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px;
+  border: 2px solid var(--text); background: transparent;
+  color: var(--text); font-size: 12px; font-weight: 700;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer; white-space: nowrap; max-width: 200px;
+  transition: background 0.1s, color 0.1s;
+}
+.set-btn:hover { background: var(--text); color: var(--bg); }
+.set-btn .dot { width: 6px; height: 6px; flex-shrink: 0; }
+.set-btn .arrow { font-size: 10px; }
+.set-btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* WORD LIST */
-.word-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px;width:100%;}
-.word-chip{border:1px solid var(--border);background:var(--bg2);border-radius:10px;padding:10px 8px;cursor:pointer;text-align:center;transition:all .2s;position:relative;overflow:hidden;}
-.word-chip:hover{border-color:rgba(255,255,255,.2);background:var(--bg3);}
-.word-chip.selected{border-color:var(--accent);background:rgba(200,169,110,.08);}
-.word-chip.correct::after{content:'✓';position:absolute;top:4px;right:6px;font-size:10px;color:var(--green);}
-.word-chip.wrong::after{content:'✗';position:absolute;top:4px;right:6px;font-size:10px;color:var(--red);}
-.chip-char{font-family:'Noto Serif SC',serif;font-size:22px;line-height:1.2;}
-.chip-pinyin{font-size:10px;color:var(--muted);margin-top:3px;font-family:'DM Mono',monospace;}
-.chip-de{font-size:10px;color:var(--muted);margin-top:2px;}
+/* ── DROPDOWN ── */
+.set-group-header {
+  padding: 10px 12px 4px; margin-top: 0;
+  font-size: 8px; font-weight: 800; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.14em;
+  border-top: 1px solid var(--border);
+}
+.set-group-header:first-child { border-top: none; }
+.set-dropdown {
+  position: absolute; top: calc(100% + 4px); right: 0;
+  background: var(--bg2); border: 2px solid var(--text);
+  min-width: 240px; max-height: 60vh; overflow-y: auto;
+  z-index: 100; display: none; padding: 0;
+}
+.set-dropdown.open { display: block; }
+.set-dropdown-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer; font-size: 12px; font-weight: 600;
+  color: var(--text2); text-transform: uppercase;
+  letter-spacing: 0.03em; transition: background 0.1s;
+}
+.set-dropdown-item:last-child { border-bottom: none; }
+.set-dropdown-item:hover, .set-dropdown-item:active { background: var(--bg3); }
+.set-dropdown-item.active { background: var(--text); color: var(--bg2); }
+.set-dropdown-item .dot { width: 6px; height: 6px; flex-shrink: 0; }
+.set-dropdown-item .count {
+  margin-left: auto; font-size: 10px; font-family: 'DM Mono', monospace;
+  font-weight: 500; color: var(--muted);
+}
+.set-dropdown-item.active .count { color: var(--border); }
+.set-dropdown-overlay { position: fixed; inset: 0; z-index: 99; display: none; }
+.set-dropdown-overlay.open { display: block; }
 
-/* PROGRESS */
-.progress-row{width:100%;display:none;align-items:center;gap:10px;font-size:12px;color:var(--muted);}
-.progress-track{flex:1;height:3px;background:var(--bg3);border-radius:2px;}
-.progress-fill{height:3px;border-radius:2px;background:var(--accent);transition:width .4s;}
+/* ── PROGRESS RING ── */
+.progress-pill {
+  display: flex; align-items: center; flex-shrink: 0;
+}
+.progress-pill .ring { width: 30px; height: 30px; position: relative; }
+.progress-pill .ring svg { transform: rotate(-90deg); }
+.progress-pill .ring-bg { stroke: var(--bg3); }
+.progress-pill .ring-fill { stroke: var(--red); transition: stroke-dashoffset 0.4s; }
+.progress-pill .ring-text {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; font-weight: 800; color: var(--text);
+  font-family: 'DM Mono', monospace;
+}
 
-/* TRAINER CARD */
-.trainer{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:32px 28px 24px;display:flex;flex-direction:column;align-items:center;min-height:360px;}
-.trainer-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--muted);height:280px;}
-.trainer-empty .arrow{font-size:26px;}
-.trainer-empty p{font-size:14px;text-align:center;line-height:1.6;max-width:260px;}
-.card-block-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:18px;align-self:flex-start;}
-.card-char-big{font-family:'Noto Serif SC',serif;font-size:84px;line-height:1;margin-bottom:10px;text-align:center;}
-.card-pinyin-big{font-family:'DM Mono',monospace;font-size:21px;margin-bottom:5px;letter-spacing:.04em;}
-.card-de-big{font-size:15px;color:var(--muted);margin-bottom:28px;}
-.card-example{font-size:13px;color:var(--muted);text-align:center;line-height:1.8;margin-bottom:24px;padding:12px 18px;background:var(--bg3);border-radius:10px;border:1px solid var(--border);width:100%;}
-.card-example strong{color:var(--text);font-weight:400;}
+/* ── CARD AREA ── */
+.card-area {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+  padding: 12px 20px; min-height: 0;
+}
+.card-track {
+  width: 100%; position: relative;
+  display: flex; align-items: center; justify-content: center;
+  flex: 1; min-height: 0;
+}
+.card {
+  width: 100%; max-width: 360px;
+  background: var(--bg2);
+  border: 2px solid var(--text);
+  padding: clamp(24px, 6vw, 44px) clamp(20px, 5vw, 36px);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  cursor: grab;
+  transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), opacity 0.3s ease;
+  user-select: none; -webkit-user-select: none;
+  position: relative; min-height: 180px;
+}
+.card:active { transform: scale(0.98); }
+.card .tap-hint {
+  position: absolute; top: 10px; right: 12px;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted);
+}
+.card-char {
+  font-family: 'Noto Serif SC', serif;
+  font-size: clamp(52px, 15vw, 86px);
+  line-height: 1.1; text-align: center;
+  color: var(--text); margin-bottom: 8px;
+}
+.card-pinyin {
+  font-family: 'DM Mono', monospace;
+  font-size: clamp(16px, 4.5vw, 21px);
+  font-weight: 700; letter-spacing: 0.05em;
+  color: var(--text); margin-bottom: 4px;
+}
+.card-meaning {
+  font-size: clamp(12px, 3.2vw, 14px);
+  font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--text2);
+  text-align: center;
+}
 
-/* MIC */
-.mic-area{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;}
-.mic-btn{width:68px;height:68px;border-radius:50%;border:2px solid rgba(200,169,110,.4);background:rgba(200,169,110,.08);color:var(--accent);font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;position:relative;}
-.mic-btn:hover{background:rgba(200,169,110,.15);border-color:var(--accent);}
-.mic-btn.listening{background:rgba(200,169,110,.2);border-color:var(--accent);animation:pulse 1.2s ease-in-out infinite;}
-.mic-btn.listening::before{content:'';position:absolute;width:88px;height:88px;border-radius:50%;border:2px solid var(--accent);opacity:0;animation:ripple 1.2s ease-out infinite;}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(200,169,110,.3)}50%{box-shadow:0 0 0 10px rgba(200,169,110,0)}}
-@keyframes ripple{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
-.mic-label{font-size:12px;color:var(--muted);letter-spacing:.04em;}
+/* ── CARD NAV ── */
+.card-nav {
+  display: flex; align-items: center; justify-content: center;
+  gap: 14px; padding: 8px 0 4px; flex-shrink: 0;
+}
+.nav-arrow {
+  width: 36px; height: 36px;
+  border: 2px solid var(--text); background: transparent;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: var(--text);
+  cursor: pointer; transition: background 0.1s, color 0.1s;
+}
+.nav-arrow:hover { background: var(--text); color: var(--bg); }
+.nav-arrow:active { transform: scale(0.92); }
+.nav-arrow[disabled] { opacity: 0.2; pointer-events: none; }
+.card-counter {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
+  color: var(--muted); min-width: 50px; text-align: center;
+}
 
-.tts-char{cursor:pointer;position:relative;}
-.tts-char:hover .tts-hint{opacity:1;}
-.tts-hint{position:absolute;bottom:-2px;right:-4px;font-size:10px;color:var(--muted);opacity:0;transition:opacity .2s;font-family:'DM Sans',sans-serif;white-space:nowrap;}
-.tts-row{display:flex;gap:8px;margin-bottom:20px;width:100%;}
-.tts-btn{flex:1;padding:8px 4px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
-.tts-btn:hover{border-color:rgba(255,255,255,.2);color:var(--text);background:var(--bg2);}
-.tts-btn:active{transform:scale(.97);}
+/* ── MIC ── */
+.mic-area {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 8px 20px 10px; flex-shrink: 0;
+}
+.mic-btn {
+  width: 72px; height: 72px; border-radius: 50%;
+  border: 3px solid var(--text); background: transparent;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.15s; position: relative;
+}
+.mic-btn .mic-icon {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--text);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.mic-btn .mic-icon svg { fill: var(--bg2); width: 22px; height: 22px; }
+.mic-btn:active { transform: scale(0.94); }
+.mic-btn.listening { border-color: var(--red); animation: mic-pulse-ring 1.4s ease-in-out infinite; }
+.mic-btn.listening .mic-icon { background: var(--red); }
+@keyframes mic-pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(232,0,28,0.35); }
+  50% { box-shadow: 0 0 0 14px rgba(232,0,28,0); }
+}
+.mic-label {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted);
+  margin-top: 6px; text-align: center; min-height: 16px;
+  transition: color 0.15s;
+}
+.mic-label.active { color: var(--red); }
 
-/* FEEDBACK */
-.feedback-area{width:100%;margin-top:18px;}
-.heard-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg3);border-radius:10px;border:1px solid var(--border);margin-bottom:10px;font-size:13px;}
-.heard-label{color:var(--muted);flex-shrink:0;}
-.heard-text{font-family:'Noto Serif SC',serif;font-size:17px;}
-.heard-match{color:var(--green);margin-left:auto;font-size:12px;font-weight:500;}
-.heard-miss{color:var(--red);margin-left:auto;font-size:12px;font-weight:500;}
-.ai-feedback{padding:14px 16px;background:var(--bg3);border-radius:12px;border:1px solid var(--border);font-size:13px;line-height:1.8;color:var(--text);min-height:54px;}
-.ai-feedback.loading::after{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);animation:blink 1s step-end infinite;margin-left:6px;vertical-align:middle;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-.feedback-tag{display:inline-block;font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:20px;margin-bottom:6px;}
-.tag-correct{background:rgba(92,184,122,.15);color:var(--green);}
-.tag-close{background:rgba(224,192,107,.15);color:var(--yellow);}
-.tag-retry{background:rgba(224,107,107,.15);color:var(--red);}
-.tag-ai{background:rgba(139,111,212,.15);color:var(--accent2);}
+/* ── STRICTNESS ── */
+.strictness {
+  display: flex; border: 2px solid var(--text);
+  margin-top: 6px; overflow: hidden; flex-shrink: 0;
+}
+.strict-seg {
+  padding: 5px 14px;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  border: none; border-right: 1px solid var(--border);
+  background: transparent; color: var(--muted);
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: background 0.1s, color 0.1s;
+  white-space: nowrap;
+}
+.strict-seg:last-child { border-right: none; }
+.strict-seg.active { background: var(--text); color: var(--bg2); }
+.strict-seg .s-icon { display: none; }
+.confidence-badge {
+  display: inline-block; font-size: 9px; color: var(--muted);
+  font-family: 'DM Mono', monospace; margin-left: 4px;
+  font-weight: 500; letter-spacing: 0;
+}
 
-/* TONE GUIDE */
-.tone-guide{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:18px 22px;}
-.tone-guide h3{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
-.tones{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
-.tone-item{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;}
-.tone-num{font-size:10px;color:var(--muted);margin-bottom:3px;}
-.tone-sym{font-family:'Noto Serif SC',serif;font-size:22px;color:var(--accent);line-height:1;margin-bottom:3px;}
-.tone-desc{font-size:10px;color:var(--muted);line-height:1.4;}
+/* ── FEEDBACK ── */
+.feedback-area {
+  width: 100%; max-width: 360px; margin: 0 auto;
+  padding: 0 20px; flex-shrink: 0;
+  overflow-y: auto; max-height: 200px;
+}
+.feedback-area:empty { display: none; }
+.feedback-card {
+  background: var(--bg2); border: 2px solid var(--text);
+  padding: 14px 16px; animation: fadeUp 0.2s ease-out;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.feedback-card.correct { border-color: var(--green); background: var(--green-light); }
+.feedback-card.wrong { border-color: var(--red); background: var(--red-dim); }
+.feedback-tag {
+  display: inline-block; font-size: 9px; font-weight: 800;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 2px 7px; margin-bottom: 6px;
+  border: 1px solid currentColor; background: transparent;
+}
+.tag-correct { color: var(--green); }
+.tag-close { color: var(--muted); }
+.tag-retry { color: var(--red); }
+.tag-ai { color: var(--text2); }
+.feedback-text { font-size: 13px; color: var(--text2); line-height: 1.6; }
+.feedback-heard {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+  color: var(--muted); margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.feedback-heard .heard-char {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 16px; color: var(--text);
+  text-transform: none;
+}
 
-.browser-warn{background:rgba(224,192,107,.08);border:1px solid rgba(224,192,107,.3);border-radius:10px;padding:12px 16px;font-size:12px;color:var(--yellow);width:100%;display:none;}
+/* Example sentence bonus */
+.example-bonus {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 10px; padding: 10px 14px;
+  border: 1px solid var(--border); background: var(--bg3);
+  cursor: pointer; transition: background 0.1s;
+}
+.example-bonus:hover, .example-bonus:active { background: var(--bg); }
+.example-bonus .icon {
+  width: 24px; height: 24px; flex-shrink: 0;
+  border: 2px solid var(--text);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800;
+}
+.example-bonus .label { font-size: 12px; color: var(--text2); }
+.example-bonus .label strong {
+  display: block; font-family: 'Noto Serif SC', serif;
+  font-size: 14px; font-weight: 400; color: var(--text);
+  margin-bottom: 1px;
+}
+
+/* AI loading */
+.ai-loading::after {
+  content: ''; display: inline-block;
+  width: 5px; height: 5px;
+  background: var(--text); margin-left: 4px;
+  animation: blink 1s step-end infinite;
+  vertical-align: middle;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ── BOTTOM BAR ── */
+.bottom-bar {
+  display: flex; padding: 0 20px 8px;
+  flex-shrink: 0; gap: 0;
+}
+.tts-pill {
+  flex: 1; padding: 8px 0;
+  border: 2px solid var(--text); border-right: none;
+  background: transparent; color: var(--text);
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: background 0.1s, color 0.1s;
+  text-align: center;
+}
+.tts-pill:last-child { border-right: 2px solid var(--text); }
+.tts-pill:hover { background: var(--text); color: var(--bg); }
+.tts-pill:active { transform: scale(0.97); }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px; color: var(--muted); padding: 40px 20px;
+}
+.empty-state .icon {
+  font-size: 10px; font-weight: 800; letter-spacing: 0.14em;
+  text-transform: uppercase; border: 2px solid var(--border);
+  padding: 8px 14px;
+}
+.empty-state p {
+  font-size: 13px; text-align: center; line-height: 1.7;
+  max-width: 240px;
+}
+
+/* ── TONE GUIDE ── */
+.tone-toggle {
+  display: flex; align-items: center; justify-content: center;
+  gap: 6px; padding: 6px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted);
+  cursor: pointer; flex-shrink: 0;
+}
+.tone-toggle:active { color: var(--text); }
+.tone-bar { display: none; padding: 0 20px 10px; flex-shrink: 0; }
+.tone-bar.open { display: block; }
+.tones-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+.tone-cell {
+  background: var(--bg2); border: 1px solid var(--border);
+  padding: 8px 4px; text-align: center;
+}
+.tone-cell .num { font-size: 8px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.tone-cell .sym { font-family: 'Noto Serif SC', serif; font-size: 20px; color: var(--text); }
+.tone-cell .desc { font-size: 9px; font-weight: 600; color: var(--muted); line-height: 1.3; }
+
+/* ── BROWSER WARNING ── */
+.browser-warn {
+  display: none; margin: 0 20px 0;
+  padding: 10px 14px;
+  background: var(--red-dim); border: 2px solid var(--red);
+  font-size: 11px; font-weight: 600; color: var(--red);
+  flex-shrink: 0; text-transform: uppercase; letter-spacing: 0.04em;
+}
+
+/* ── SETTINGS ── */
+.settings-btn {
+  width: 28px; height: 28px;
+  border: 2px solid var(--text); background: transparent;
+  font-size: 16px; font-weight: 700; color: var(--text);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  margin-left: 6px; transition: background 0.1s, color 0.1s;
+}
+.settings-btn:hover { background: var(--text); color: var(--bg); }
+.settings-panel {
+  display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--bg); z-index: 200;
+  flex-direction: column; padding: 0 20px;
+}
+.settings-panel.open { display: flex; }
+.settings-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0 12px;
+  border-bottom: 2px solid var(--text);
+  font-size: 12px; font-weight: 800;
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.settings-close {
+  width: 32px; height: 32px; border: 2px solid var(--text);
+  background: transparent; font-size: 18px; font-weight: 700;
+  color: var(--text); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.1s, color 0.1s;
+}
+.settings-close:hover { background: var(--text); color: var(--bg); }
+.settings-body { padding: 20px 0; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; min-height: 0; }
+.settings-stats {
+  font-size: 12px; font-weight: 600; color: var(--text2);
+  line-height: 1.8; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  overflow-y: auto; max-height: 50vh;
+}
+.settings-stats strong { font-weight: 800; color: var(--text); }
+.settings-action {
+  padding: 10px 16px; border: 2px solid var(--text);
+  background: transparent; color: var(--text);
+  font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  text-align: left; transition: background 0.1s, color 0.1s;
+}
+.settings-action:hover { background: var(--text); color: var(--bg); }
+.settings-action.danger { border-color: var(--red); color: var(--red); }
+.settings-action.danger:hover { background: var(--red); color: var(--bg2); }
+.settings-msg {
+  font-size: 11px; font-weight: 600; color: var(--green);
+  letter-spacing: 0.04em; min-height: 18px;
+  text-transform: uppercase;
+}
+.settings-msg.error { color: var(--red); }
+
+/* ── SWIPE ── */
+.card.swipe-left { transform: translateX(-110%) rotate(-3deg); opacity: 0; }
+.card.swipe-right { transform: translateX(110%) rotate(3deg); opacity: 0; }
+.card.swipe-enter-left { animation: enterFromRight 0.25s ease-out forwards; }
+.card.swipe-enter-right { animation: enterFromLeft 0.25s ease-out forwards; }
+@keyframes enterFromRight {
+  from { transform: translateX(50px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes enterFromLeft {
+  from { transform: translateX(-50px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* ── FLASH ── */
+.card.flash-correct { animation: flashCorrect 0.35s ease-out; }
+@keyframes flashCorrect {
+  0% { box-shadow: none; }
+  50% { box-shadow: 4px 4px 0 var(--green); border-color: var(--green); }
+  100% { box-shadow: none; }
+}
+.card.flash-wrong { animation: flashWrong 0.35s ease-out; }
+@keyframes flashWrong {
+  0% { box-shadow: none; }
+  50% { box-shadow: 4px 4px 0 var(--red); border-color: var(--red); }
+  100% { box-shadow: none; }
+}
+
+/* ── RESPONSIVE: small screens ── */
+@media (max-height: 700px) {
+  .header { padding: 8px 16px 6px; }
+  .header-brand { font-size: 13px; }
+  .card { padding: clamp(16px, 4vw, 28px) clamp(16px, 4vw, 28px); min-height: 150px; }
+  .card-char { font-size: clamp(44px, 12vw, 64px); margin-bottom: 4px; }
+  .card-pinyin { font-size: 14px; margin-bottom: 2px; }
+  .card-meaning { font-size: 11px; }
+  .card-nav { padding: 4px 0 2px; gap: 10px; }
+  .nav-arrow { width: 30px; height: 30px; font-size: 14px; }
+  .mic-area { padding: 4px 20px 6px; }
+  .mic-btn { width: 58px; height: 58px; }
+  .mic-btn .mic-icon { width: 36px; height: 36px; }
+  .mic-btn .mic-icon svg { width: 18px; height: 18px; }
+  .mic-label { margin-top: 3px; font-size: 8px; min-height: 12px; }
+  .strictness { margin-top: 3px; }
+  .strict-seg { padding: 3px 10px; font-size: 9px; }
+  .bottom-bar { padding: 0 16px 4px; }
+  .tts-pill { padding: 5px 0; font-size: 10px; }
+  .tone-toggle { padding: 3px; font-size: 9px; }
+  .feedback-area { max-height: 130px; }
+  .feedback-card { padding: 10px 12px; }
+  .feedback-tag { font-size: 8px; }
+  .feedback-text { font-size: 12px; line-height: 1.5; }
+}
+
+@media (min-height: 750px) {
+  .card { padding: clamp(32px, 7vw, 52px) clamp(24px, 6vw, 40px); }
+  .card-char { font-size: clamp(60px, 16vw, 88px); }
+  .mic-area { padding: 10px 20px 14px; }
+  .mic-btn { width: 80px; height: 80px; }
+  .mic-btn .mic-icon { width: 50px; height: 50px; }
+  .mic-btn .mic-icon svg { width: 24px; height: 24px; }
+  .feedback-area { max-height: 240px; }
+}
+
+@media (min-height: 900px) {
+  .feedback-area { max-height: 300px; }
+  .card-area { padding: 20px 20px; }
+}
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div>
-    <div class="topbar-logo">普通话</div>
-    <div class="topbar-sub">Aussprache-Trainer</div>
-  </div>
-  <div class="block-tabs" id="blockTabs"></div>
-  <button class="import-btn" onclick="toggleImport()">＋ Block importieren</button>
-</div>
-
-<div class="main">
-  <div class="browser-warn" id="warn">⚠️ Spracherkennung funktioniert nur in Chrome oder Edge — bitte dort öffnen (via localhost).</div>
-
-  <div class="import-panel" id="importPanel">
-    <h3>Neuen Block importieren</h3>
-    <p>Füge hier den JSON-Block ein, den du von Claude erhalten hast. Er wird dauerhaft gespeichert und erscheint als neuer Tab — auch nach dem Schließen des Browsers.</p>
-    <textarea id="importTextarea" placeholder='{"block":5,"title":"Block 5 · Gefühle","color":"#378ADD","words":[{"char":"开心","pinyin":"Kāixīn","de":"Fröhlich","ex_cn":"你开心吗？","ex_de":"Bist du fröhlich?","tip":"1. + 1. Ton. ..."}]}'></textarea>
-    <div class="import-actions">
-      <button class="btn-primary" onclick="doImport()">Importieren</button>
-      <button class="btn-ghost"   onclick="toggleImport()">Abbrechen</button>
-      <span class="import-msg" id="importMsg"></span>
+<div class="app" id="app">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-brand">普通话<small>Aussprache-Trainer</small></div>
+    <div class="set-selector">
+      <button class="set-btn" id="setBtn" onclick="toggleDropdown()">
+        <span class="dot" id="setDot"></span>
+        <span id="setLabel">Block 1</span>
+        <span class="arrow">▾</span>
+      </button>
+      <div class="set-dropdown-overlay" id="dropOverlay" onclick="toggleDropdown()"></div>
+      <div class="set-dropdown" id="setDropdown"></div>
+    </div>
+    <div class="progress-pill">
+      <div class="ring">
+        <svg width="28" height="28" viewBox="0 0 28 28">
+          <circle class="ring-bg" cx="14" cy="14" r="11" fill="none" stroke-width="2.5"/>
+          <circle class="ring-fill" id="progressRing" cx="14" cy="14" r="11" fill="none" stroke-width="2.5"
+            stroke-dasharray="69.12" stroke-dashoffset="69.12" stroke-linecap="square"/>
+        </svg>
+        <div class="ring-text" id="progressText">0</div>
+      </div>
+      <button class="settings-btn" id="settingsBtn" onclick="toggleSettings()">≡</button>
     </div>
   </div>
 
-  <div class="word-list"    id="wordList"></div>
-  <div class="progress-row" id="progressRow">
-    <span id="progressText">0 / 0 geübt</span>
-    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-  </div>
-  <div class="trainer" id="trainer">
-    <div class="trainer-empty">
-      <div class="arrow">👆</div>
-      <p>Wähle ein Wort, dann sprich es laut — ich überprüfe deine Aussprache.</p>
+  <!-- SETTINGS PANEL -->
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-header">
+      <span>Fortschritt</span>
+      <button class="settings-close" onclick="toggleSettings()">×</button>
+    </div>
+    <div class="settings-body">
+      <div class="settings-stats" id="settingsStats"></div>
+      <button class="settings-action" onclick="exportProgress()">Speichern (Kopieren)</button>
+      <button class="settings-action" onclick="importProgress()">Laden (Einfügen)</button>
+      <button class="settings-action danger" onclick="resetProgress()">Fortschritt löschen</button>
+      <div class="settings-msg" id="settingsMsg"></div>
     </div>
   </div>
 
-  <div class="tone-guide">
-    <h3>Die 4 Töne des Mandarin</h3>
-    <div class="tones">
-      <div class="tone-item"><div class="tone-num">1. Ton</div><div class="tone-sym">ā</div><div class="tone-desc">Hoch &amp; gleichmäßig</div></div>
-      <div class="tone-item"><div class="tone-num">2. Ton</div><div class="tone-sym">á</div><div class="tone-desc">Steigend, wie Frage</div></div>
-      <div class="tone-item"><div class="tone-num">3. Ton</div><div class="tone-sym">ǎ</div><div class="tone-desc">Erst tief, dann hoch</div></div>
-      <div class="tone-item"><div class="tone-num">4. Ton</div><div class="tone-sym">à</div><div class="tone-desc">Scharf fallend</div></div>
+  <!-- BROWSER WARNING -->
+  <div class="browser-warn" id="warn">Spracherkennung benötigt Chrome/Edge + HTTPS.</div>
+
+  <!-- CARD AREA -->
+  <div class="card-area" id="cardArea">
+    <div class="card-track" id="cardTrack">
+      <div class="card" id="card">
+        <div class="empty-state">
+          <div class="icon">普通话</div>
+          <p>Wähle einen Block oben — tippe auf die Karte zum Anhören und sprich nach.</p>
+        </div>
+      </div>
+    </div>
+    <div class="card-nav">
+      <button class="nav-arrow" id="navPrev" onclick="prevCard()">‹</button>
+      <div class="card-counter" id="cardCounter">–</div>
+      <button class="nav-arrow" id="navNext" onclick="nextCard()">›</button>
+    </div>
+  </div>
+
+  <!-- MIC -->
+  <div class="mic-area">
+    <button class="mic-btn" id="micBtn" onclick="toggleMic()"><span class="mic-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></span></button>
+    <div class="mic-label" id="micLabel">Tippe & sprich</div>
+    <div class="strictness" id="strictness">
+      <button class="strict-seg active" data-level="0" onclick="setStrictness(0)"><span class="s-icon"></span>Einfach</button>
+      <button class="strict-seg" data-level="1" onclick="setStrictness(1)"><span class="s-icon"></span>Normal</button>
+      <button class="strict-seg" data-level="2" onclick="setStrictness(2)"><span class="s-icon"></span>Schwierig</button>
+    </div>
+  </div>
+
+  <!-- FEEDBACK -->
+  <div class="feedback-area" id="feedbackArea"></div>
+
+  <!-- TTS SHORTCUTS -->
+  <div class="bottom-bar" id="bottomBar">
+    <button class="tts-pill" onclick="speakCurrent()">Anhören</button>
+    <button class="tts-pill" onclick="speakSlow()">Langsam</button>
+    <button class="tts-pill" onclick="speakExample()">Beispiel</button>
+  </div>
+
+  <!-- TONE GUIDE -->
+  <div class="tone-toggle" onclick="toggleTones()">
+    <span>Ton-Guide</span><span id="toneArrow">▾</span>
+  </div>
+  <div class="tone-bar" id="toneBar">
+    <div class="tones-grid">
+      <div class="tone-cell"><div class="num">1. Ton</div><div class="sym">ā</div><div class="desc">Hoch & gleich</div></div>
+      <div class="tone-cell"><div class="num">2. Ton</div><div class="sym">á</div><div class="desc">Steigend</div></div>
+      <div class="tone-cell"><div class="num">3. Ton</div><div class="sym">ǎ</div><div class="desc">Tief → hoch</div></div>
+      <div class="tone-cell"><div class="num">4. Ton</div><div class="sym">à</div><div class="desc">Scharf fallend</div></div>
     </div>
   </div>
 </div>
 
 <script>
-// ── SEED DATA ──
-const SEED=[
-  {block:1,title:"Block 1 · Begrüßungen",color:"#9b8fd4",words:[
-    {char:"你好",pinyin:"Nǐ hǎo",de:"Hallo",ex_cn:"你好！",ex_de:"Hallo!",tip:"Beide 3. Ton — in der Praxis klingt 你 wie 2. Ton vor einem weiteren 3. Ton."},
-    {char:"谢谢",pinyin:"Xièxie",de:"Danke",ex_cn:"谢谢你！",ex_de:"Danke dir!",tip:"4. Ton + neutraler Ton. Die zweite Silbe ist kurz und flach."},
-    {char:"再见",pinyin:"Zàijiàn",de:"Tschüss",ex_cn:"再见！",ex_de:"Tschüss!",tip:"Beide 4. Ton (fallend). Kurz und bestimmt."},
-    {char:"请",pinyin:"Qǐng",de:"Bitte",ex_cn:"请坐。",ex_de:"Bitte setz dich.",tip:"3. Ton, fallend-steigend. Das Q wird wie weiches Ch ausgesprochen."},
-    {char:"对不起",pinyin:"Duìbuqǐ",de:"Entschuldigung",ex_cn:"对不起！",ex_de:"Entschuldigung!",tip:"4. + neutral + 3. Ton. Die mittlere Silbe bu ist sehr kurz."},
-    {char:"没关系",pinyin:"Méiguānxi",de:"Macht nichts",ex_cn:"没关系！",ex_de:"Macht nichts!",tip:"2. + 1. + neutral. Ein freundlicher, beruhigender Klang."},
-    {char:"好",pinyin:"Hǎo",de:"Gut / Okay",ex_cn:"好，好的！",ex_de:"Gut, alles klar!",tip:"3. Ton. Fällt zunächst tief, dann wieder hoch."},
-    {char:"不",pinyin:"Bù",de:"Nein / Nicht",ex_cn:"不好。",ex_de:"Nicht gut.",tip:"Normalerweise 4. Ton — vor einem weiteren 4. Ton wird er zu 2. Ton."},
-    {char:"是",pinyin:"Shì",de:"Ja / Ist",ex_cn:"是的。",ex_de:"Ja, genau.",tip:"4. Ton, scharf fallend. Das Sh ist retroflexiv — Zunge nach oben biegen."},
-    {char:"我",pinyin:"Wǒ",de:"Ich",ex_cn:"我很好。",ex_de:"Mir geht's gut.",tip:"3. Ton. In schneller Sprache oft nur kurz tief."},
-    {char:"你",pinyin:"Nǐ",de:"Du",ex_cn:"你好吗？",ex_de:"Wie geht's dir?",tip:"3. Ton, fallend-steigend. Klingt fast wie knee mit Fragezeichen."},
-    {char:"很好",pinyin:"Hěn hǎo",de:"Sehr gut",ex_cn:"很好，谢谢！",ex_de:"Sehr gut, danke!",tip:"Beide 3. Ton — der erste wird meist zum 2. Ton: hén hǎo. Tonsandhi!"},
-    {char:"早上好",pinyin:"Zǎoshang hǎo",de:"Guten Morgen",ex_cn:"早上好！",ex_de:"Guten Morgen!",tip:"3. + neutral + 3. Ton. Zǎo allein ist informell für Morgen."},
-    {char:"晚上好",pinyin:"Wǎnshang hǎo",de:"Guten Abend",ex_cn:"晚上好！",ex_de:"Guten Abend!",tip:"3. + neutral + 3. Ton. Formeller als 你好."},
+// ── SEED DATA (4 original blocks) ──
+const SEED = [
+  {block:1,title:"Begrüßungen",group:"Basics",color:"#7B6BB5",words:[
+    {char:"你好",pinyin:"Nǐ hǎo",de:"Hallo",ex_cn:"你好！你好吗？",ex_de:"Hallo! Wie geht's?",tip:"Beide 3. Ton — in der Praxis klingt 你 wie 2. Ton."},
+    {char:"谢谢",pinyin:"Xièxie",de:"Danke",ex_cn:"谢谢你！",ex_de:"Danke dir!",tip:"4. Ton + neutraler Ton."},
+    {char:"再见",pinyin:"Zàijiàn",de:"Tschüss",ex_cn:"再见！明天见！",ex_de:"Tschüss! Bis morgen!",tip:"Beide 4. Ton — kurz und bestimmt."},
+    {char:"请",pinyin:"Qǐng",de:"Bitte",ex_cn:"请坐。",ex_de:"Bitte setz dich.",tip:"3. Ton. Q wie weiches Ch."},
+    {char:"对不起",pinyin:"Duìbuqǐ",de:"Entschuldigung",ex_cn:"对不起，我迟到了。",ex_de:"Entschuldigung, ich bin zu spät.",tip:"4. + neutral + 3. Ton."},
+    {char:"没关系",pinyin:"Méiguānxi",de:"Macht nichts",ex_cn:"没关系！",ex_de:"Macht nichts!",tip:"2. + 1. + neutral."},
+    {char:"好",pinyin:"Hǎo",de:"Gut / Okay",ex_cn:"好的，没问题！",ex_de:"Okay, kein Problem!",tip:"3. Ton — fällt tief, dann hoch."},
+    {char:"不",pinyin:"Bù",de:"Nein / Nicht",ex_cn:"不好意思。",ex_de:"Entschuldigung (informell).",tip:"4. Ton, wird vor 4. Ton zu 2. Ton."},
+    {char:"是",pinyin:"Shì",de:"Ja / Ist",ex_cn:"是的，我是德国人。",ex_de:"Ja, ich bin Deutscher.",tip:"4. Ton. Sh retroflex."},
+    {char:"我",pinyin:"Wǒ",de:"Ich",ex_cn:"我很好，谢谢！",ex_de:"Mir geht's gut, danke!",tip:"3. Ton."},
+    {char:"你",pinyin:"Nǐ",de:"Du",ex_cn:"你叫什么名字？",ex_de:"Wie heißt du?",tip:"3. Ton — klingt fast wie née."},
+    {char:"很好",pinyin:"Hěn hǎo",de:"Sehr gut",ex_cn:"很好，谢谢！",ex_de:"Sehr gut, danke!",tip:"Tonsandhi: hén hǎo."},
+    {char:"早上好",pinyin:"Zǎoshang hǎo",de:"Guten Morgen",ex_cn:"早上好！今天天气很好。",ex_de:"Guten Morgen! Heute ist schönes Wetter.",tip:"3. + neutral + 3. Ton."},
+    {char:"晚上好",pinyin:"Wǎnshang hǎo",de:"Guten Abend",ex_cn:"晚上好！吃饭了吗？",ex_de:"Guten Abend! Hast du schon gegessen?",tip:"3. + neutral + 3. Ton."},
   ]},
-  {block:2,title:"Block 2 · Familie",color:"#5cb8a0",words:[
-    {char:"爸爸",pinyin:"Bàba",de:"Papa",ex_cn:"爸爸来了！",ex_de:"Papa kommt!",tip:"4. + neutral. Bà-ba, die zweite Silbe fast unhörbar tief."},
-    {char:"妈妈",pinyin:"Māma",de:"Mama",ex_cn:"妈妈在哪？",ex_de:"Wo ist Mama?",tip:"1. + neutral. Hoch und gleichmäßig gehalten, dann abklingen."},
-    {char:"爷爷",pinyin:"Yéye",de:"Opa (väterl.)",ex_cn:"爷爷好！",ex_de:"Hallo Opa!",tip:"2. + neutral. Steigend wie eine Frage — dann loslassen."},
-    {char:"奶奶",pinyin:"Nǎinai",de:"Oma (väterl.)",ex_cn:"奶奶好！",ex_de:"Hallo Oma!",tip:"3. + neutral. Das erste nǎi fällt und steigt, das zweite ist kurz flach."},
-    {char:"姥姥",pinyin:"Lǎolao",de:"Oma (mütterl.)",ex_cn:"姥姥做的！",ex_de:"Oma hat das gemacht!",tip:"3. + neutral. Das L ist wie im Deutschen."},
-    {char:"姥爷",pinyin:"Lǎoye",de:"Opa (mütterl.)",ex_cn:"姥爷来了。",ex_de:"Opa kommt.",tip:"3. + neutral. Entspannter Klang — der zweite Teil fast geflüstert."},
-    {char:"哥哥",pinyin:"Gēge",de:"Großer Bruder",ex_cn:"哥哥在哪？",ex_de:"Wo ist der große Bruder?",tip:"1. + neutral. Hohes gleichmäßiges Ge, dann kurzes neutrales ge."},
-    {char:"姐姐",pinyin:"Jiějie",de:"Große Schwester",ex_cn:"姐姐帮我！",ex_de:"Schwester, hilf mir!",tip:"3. + neutral. Das J ist wie ein weiches Dsch."},
-    {char:"弟弟",pinyin:"Dìdi",de:"Kleiner Bruder",ex_cn:"弟弟来玩！",ex_de:"Komm spielen, Bruder!",tip:"4. + neutral. Scharf fallend, dann kurz neutral."},
-    {char:"妹妹",pinyin:"Mèimei",de:"Kleine Schwester",ex_cn:"妹妹好可爱！",ex_de:"Die kleine Schwester ist süß!",tip:"4. + neutral. Mei fällt scharf, dann kurzer neutraler Nachklang."},
-    {char:"宝宝",pinyin:"Bǎobao",de:"Baby / Kleines",ex_cn:"宝宝乖！",ex_de:"Braves Kleines!",tip:"3. + neutral. Liebevoll — der erste Teil steigt, dann loslassen."},
-    {char:"孩子",pinyin:"Háizi",de:"Kind",ex_cn:"孩子们！",ex_de:"Kinder!",tip:"2. + neutral. Steigend auf hái, dann kurzes zi fast wie dz."},
-    {char:"家",pinyin:"Jiā",de:"Familie / Zuhause",ex_cn:"回家了！",ex_de:"Wir gehen nach Hause!",tip:"1. Ton, hoch und klar gehalten. Jia — kein deutsches Ja!"},
-    {char:"我们",pinyin:"Wǒmen",de:"Wir",ex_cn:"我们一起！",ex_de:"Wir zusammen!",tip:"3. + neutral. Wǒ fällt-steigt, men ist kurz und flach."},
+  {block:2,title:"Familie",group:"Basics",color:"#3D9A7A",words:[
+    {char:"爸爸",pinyin:"Bàba",de:"Papa",ex_cn:"爸爸在家吗？",ex_de:"Ist Papa zu Hause?",tip:"4. + neutral."},
+    {char:"妈妈",pinyin:"Māma",de:"Mama",ex_cn:"妈妈做饭了。",ex_de:"Mama hat gekocht.",tip:"1. + neutral."},
+    {char:"爷爷",pinyin:"Yéye",de:"Opa (väterl.)",ex_cn:"爷爷好！",ex_de:"Hallo Opa!",tip:"2. + neutral."},
+    {char:"奶奶",pinyin:"Nǎinai",de:"Oma (väterl.)",ex_cn:"奶奶做的菜很好吃。",ex_de:"Omas Essen ist lecker.",tip:"3. + neutral."},
+    {char:"姥姥",pinyin:"Lǎolao",de:"Oma (mütterl.)",ex_cn:"姥姥来了！",ex_de:"Oma ist da!",tip:"3. + neutral."},
+    {char:"姥爷",pinyin:"Lǎoye",de:"Opa (mütterl.)",ex_cn:"姥爷在看电视。",ex_de:"Opa schaut fern.",tip:"3. + neutral."},
+    {char:"哥哥",pinyin:"Gēge",de:"Großer Bruder",ex_cn:"哥哥帮帮我！",ex_de:"Bruder, hilf mir!",tip:"1. + neutral."},
+    {char:"姐姐",pinyin:"Jiějie",de:"Große Schwester",ex_cn:"姐姐在哪里？",ex_de:"Wo ist die große Schwester?",tip:"3. + neutral. J wie weiches Dsch."},
+    {char:"弟弟",pinyin:"Dìdi",de:"Kleiner Bruder",ex_cn:"弟弟想玩。",ex_de:"Der kleine Bruder will spielen.",tip:"4. + neutral."},
+    {char:"妹妹",pinyin:"Mèimei",de:"Kleine Schwester",ex_cn:"妹妹好可爱！",ex_de:"Die kleine Schwester ist süß!",tip:"4. + neutral."},
+    {char:"宝宝",pinyin:"Bǎobao",de:"Baby / Schatz",ex_cn:"宝宝睡觉了。",ex_de:"Das Baby schläft.",tip:"3. + neutral."},
+    {char:"孩子",pinyin:"Háizi",de:"Kind",ex_cn:"孩子们来吃饭！",ex_de:"Kinder, kommt essen!",tip:"2. + neutral."},
+    {char:"家",pinyin:"Jiā",de:"Zuhause",ex_cn:"我们回家吧。",ex_de:"Lass uns nach Hause gehen.",tip:"1. Ton, hoch und klar."},
+    {char:"我们",pinyin:"Wǒmen",de:"Wir",ex_cn:"我们一起去吧！",ex_de:"Lass uns zusammen gehen!",tip:"3. + neutral."},
   ]},
-  {block:3,title:"Block 3 · Essen",color:"#e08b6b",words:[
-    {char:"好吃",pinyin:"Hǎochī",de:"Lecker (Essen)",ex_cn:"好吃！谢谢！",ex_de:"Lecker! Danke!",tip:"3. + 1. Ton. Chī mit retroflexem Ch — Zunge nach oben wie englisch church."},
-    {char:"好喝",pinyin:"Hǎohē",de:"Lecker (Trinken)",ex_cn:"好喝！",ex_de:"Das schmeckt gut!",tip:"3. + 1. Ton. Hē ist einfach — wie deutsches He mit langem hohem Vokal."},
-    {char:"饿了",pinyin:"È le",de:"Hungrig",ex_cn:"我饿了！",ex_de:"Ich bin hungrig!",tip:"4. + neutral. È ist ein offenes Ä, das scharf fällt. Le zeigt Zustandsänderung."},
-    {char:"饱了",pinyin:"Bǎo le",de:"Satt",ex_cn:"我饱了，谢谢！",ex_de:"Ich bin satt, danke!",tip:"3. + neutral. Bǎo fällt und steigt. Sehr nützlich beim Familienessen!"},
-    {char:"吃饭",pinyin:"Chī fàn",de:"Essen (Mahlzeit)",ex_cn:"吃饭了！",ex_de:"Zeit zum Essen!",tip:"1. + 4. Ton. Wörtlich Reis essen — bedeutet aber jede Mahlzeit."},
-    {char:"喝",pinyin:"Hē",de:"Trinken",ex_cn:"喝水！",ex_de:"Trink Wasser!",tip:"1. Ton, hoch gehalten. Einfachstes Wort im Block — perfekt für den 1. Ton."},
-    {char:"水",pinyin:"Shuǐ",de:"Wasser",ex_cn:"喝水吧。",ex_de:"Trink etwas Wasser.",tip:"3. Ton. Das Sh ist retroflex — uǐ klingt wie wei mit fallendem Glide."},
-    {char:"茶",pinyin:"Chá",de:"Tee",ex_cn:"喝茶吗？",ex_de:"Möchtest du Tee?",tip:"2. Ton, steigend. Chá — retroflex Ch, dann steigender a-Laut."},
-    {char:"米饭",pinyin:"Mǐfàn",de:"Reis",ex_cn:"吃米饭！",ex_de:"Iss Reis!",tip:"3. + 4. Ton. Mǐ (ungeschliffener Reis) + fàn (Mahlzeit). Kurz und klar."},
-    {char:"菜",pinyin:"Cài",de:"Gemüse / Gericht",ex_cn:"多吃菜。",ex_de:"Iss mehr Gemüse.",tip:"4. Ton. Das C ist ein scharfes Ts — wie in Zar. Nicht K!"},
-    {char:"多吃点",pinyin:"Duō chī diǎn",de:"Iss noch etwas",ex_cn:"多吃点！",ex_de:"Komm, iss noch etwas!",tip:"1. + 1. + 3. Ton. Freundliche Aufforderung — perfekt für Familienessen."},
-    {char:"够了",pinyin:"Gòu le",de:"Genug / Reicht",ex_cn:"够了，谢谢！",ex_de:"Genug, danke!",tip:"4. + neutral. Gòu fällt scharf. Sehr wichtig um höflich abzulehnen!"},
-    {char:"筷子",pinyin:"Kuàizi",de:"Stäbchen",ex_cn:"用筷子吗？",ex_de:"Benutzt du Stäbchen?",tip:"4. + neutral. Das Ku hat kein deutsches Äquivalent — Lippen mehr runden."},
-    {char:"来，吃",pinyin:"Lái, chī",de:"Komm, iss",ex_cn:"来，吃吧！",ex_de:"Komm, iss!",tip:"2. + 1. Ton. Ein freundlicher Ruf — steigend, dann hoch gehalten."},
+  {block:3,title:"Essen & Trinken",group:"Basics",color:"#D4704A",words:[
+    {char:"好吃",pinyin:"Hǎochī",de:"Lecker (Essen)",ex_cn:"这个菜很好吃！",ex_de:"Dieses Gericht ist sehr lecker!",tip:"3. + 1. Ton."},
+    {char:"好喝",pinyin:"Hǎohē",de:"Lecker (Trinken)",ex_cn:"这个茶很好喝。",ex_de:"Dieser Tee schmeckt gut.",tip:"3. + 1. Ton."},
+    {char:"饿了",pinyin:"È le",de:"Hungrig",ex_cn:"我饿了，我们去吃饭吧。",ex_de:"Ich bin hungrig, lass uns essen gehen.",tip:"4. + neutral."},
+    {char:"饱了",pinyin:"Bǎo le",de:"Satt",ex_cn:"我饱了，谢谢！",ex_de:"Ich bin satt, danke!",tip:"3. + neutral."},
+    {char:"吃饭",pinyin:"Chī fàn",de:"Essen (Mahlzeit)",ex_cn:"吃饭了！快来！",ex_de:"Zeit zum Essen! Komm schnell!",tip:"1. + 4. Ton."},
+    {char:"喝",pinyin:"Hē",de:"Trinken",ex_cn:"你想喝什么？",ex_de:"Was möchtest du trinken?",tip:"1. Ton — hoch gehalten."},
+    {char:"水",pinyin:"Shuǐ",de:"Wasser",ex_cn:"请给我一杯水。",ex_de:"Bitte gib mir ein Glas Wasser.",tip:"3. Ton. Sh retroflex."},
+    {char:"茶",pinyin:"Chá",de:"Tee",ex_cn:"喝茶吗？",ex_de:"Möchtest du Tee?",tip:"2. Ton — steigend."},
+    {char:"米饭",pinyin:"Mǐfàn",de:"Reis",ex_cn:"我要一碗米饭。",ex_de:"Ich möchte eine Schüssel Reis.",tip:"3. + 4. Ton."},
+    {char:"菜",pinyin:"Cài",de:"Gemüse / Gericht",ex_cn:"多吃菜，少吃肉。",ex_de:"Iss mehr Gemüse, weniger Fleisch.",tip:"4. Ton. C = scharfes Ts."},
+    {char:"多吃点",pinyin:"Duō chī diǎn",de:"Iss noch etwas",ex_cn:"来，多吃点！",ex_de:"Komm, iss noch etwas!",tip:"1. + 1. + 3. Ton."},
+    {char:"够了",pinyin:"Gòu le",de:"Genug",ex_cn:"够了够了，谢谢！",ex_de:"Genug, genug, danke!",tip:"4. + neutral."},
+    {char:"筷子",pinyin:"Kuàizi",de:"Stäbchen",ex_cn:"你会用筷子吗？",ex_de:"Kannst du Stäbchen benutzen?",tip:"4. + neutral."},
+    {char:"来，吃",pinyin:"Lái, chī",de:"Komm, iss",ex_cn:"来来来，吃吧！",ex_de:"Komm komm, iss!",tip:"2. + 1. Ton."},
   ]},
-  {block:4,title:"Block 4 · Kinder & Spielen",color:"#c8a96e",words:[
-    {char:"玩",pinyin:"Wán",de:"Spielen",ex_cn:"我们去玩！",ex_de:"Lass uns spielen!",tip:"2. Ton, steigend — kurz und energisch."},
-    {char:"小心",pinyin:"Xiǎoxīn",de:"Vorsicht!",ex_cn:"小心！",ex_de:"Pass auf!",tip:"3. + 1. Ton. Xiǎo fällt-steigt, xīn hoch halten. X wie Sch vor i."},
-    {char:"真棒",pinyin:"Zhēn bàng",de:"Super! Toll!",ex_cn:"真棒！",ex_de:"Super!",tip:"1. + 4. Ton. Retroflex Zh wie Dsch. Bàng fällt scharf — voller Begeisterung!"},
-    {char:"好玩",pinyin:"Hǎowán",de:"Spaßig / lustig",ex_cn:"好玩吗？",ex_de:"Macht das Spaß?",tip:"3. + 2. Ton. Fällt-steigt, dann steigt — eine schöne Melodie."},
-    {char:"一起",pinyin:"Yīqǐ",de:"Zusammen",ex_cn:"一起玩！",ex_de:"Zusammen spielen!",tip:"1. + 3. Ton. Yī hoch gehalten, qǐ fällt-steigt. Q wie Ch vor i."},
-    {char:"快点",pinyin:"Kuài diǎn",de:"Schnell!",ex_cn:"快点！",ex_de:"Schnell!",tip:"4. + 3. Ton. Scharf fallend, dann fällt-steigt. Energisch!"},
-    {char:"不要",pinyin:"Bùyào",de:"Lass das! / Nicht!",ex_cn:"不要！",ex_de:"Lass das!",tip:"4. + 4. Ton — aber 不 wird zu 2. Ton: bú yào. Tonsandhi!"},
-    {char:"停",pinyin:"Tíng",de:"Stopp!",ex_cn:"停！",ex_de:"Stopp!",tip:"2. Ton, steigend. Kurz und scharf — Zunge an den oberen Zähnen."},
-    {char:"帮我",pinyin:"Bāng wǒ",de:"Hilf mir",ex_cn:"帮我！妈妈！",ex_de:"Hilf mir! Mama!",tip:"1. + 3. Ton. Bāng hoch halten, dann wǒ fällt-steigt."},
-    {char:"看！",pinyin:"Kàn!",de:"Schau! Guck!",ex_cn:"你看！",ex_de:"Schau mal!",tip:"4. Ton — scharf und kurz fallend. Kinder sagen das ständig!"},
-    {char:"跑",pinyin:"Pǎo",de:"Rennen!",ex_cn:"快跑！",ex_de:"Lauf schnell!",tip:"3. Ton. Fällt tief, dann wieder hoch. Das P ist stark aspiriert."},
-    {char:"起来",pinyin:"Qǐlái",de:"Aufstehen",ex_cn:"起来！",ex_de:"Aufstehen!",tip:"3. + 2. Ton. Fällt-steigt, dann steigt — klingt fast wie eine Frage."},
-    {char:"洗手",pinyin:"Xǐshǒu",de:"Hände waschen",ex_cn:"洗手了！",ex_de:"Hände waschen!",tip:"3. + 3. Ton — der erste wird zu 2. Ton: xíshǒu. Tonsandhi!"},
-    {char:"上厕所",pinyin:"Shàng cèsuǒ",de:"Zur Toilette",ex_cn:"去上厕所吗？",ex_de:"Musst du auf die Toilette?",tip:"4. + 4. + 3. Ton. Das C ist Ts, Sh retroflex. Schritt für Schritt üben."},
+  {block:4,title:"Kinder & Spielen",group:"Basics",color:"#C8A040",words:[
+    {char:"玩",pinyin:"Wán",de:"Spielen",ex_cn:"我们出去玩吧！",ex_de:"Lass uns draußen spielen!",tip:"2. Ton — steigend."},
+    {char:"小心",pinyin:"Xiǎoxīn",de:"Vorsicht!",ex_cn:"小心，地上滑！",ex_de:"Vorsicht, der Boden ist rutschig!",tip:"3. + 1. Ton. X wie Sch vor i."},
+    {char:"真棒",pinyin:"Zhēn bàng",de:"Super! Toll!",ex_cn:"你真棒！",ex_de:"Du bist super!",tip:"1. + 4. Ton. Zh retroflex."},
+    {char:"好玩",pinyin:"Hǎowán",de:"Spaßig",ex_cn:"这个游戏好玩吗？",ex_de:"Ist das Spiel spaßig?",tip:"3. + 2. Ton."},
+    {char:"一起",pinyin:"Yīqǐ",de:"Zusammen",ex_cn:"一起玩吧！",ex_de:"Lass uns zusammen spielen!",tip:"1. + 3. Ton."},
+    {char:"快点",pinyin:"Kuài diǎn",de:"Schnell!",ex_cn:"快点，要迟到了！",ex_de:"Schnell, wir kommen zu spät!",tip:"4. + 3. Ton."},
+    {char:"不要",pinyin:"Bùyào",de:"Nicht! Lass das!",ex_cn:"不要跑！",ex_de:"Nicht rennen!",tip:"Tonsandhi: bú yào."},
+    {char:"停",pinyin:"Tíng",de:"Stopp!",ex_cn:"停！等一下！",ex_de:"Stopp! Warte mal!",tip:"2. Ton — steigend."},
+    {char:"帮我",pinyin:"Bāng wǒ",de:"Hilf mir",ex_cn:"妈妈，帮我！",ex_de:"Mama, hilf mir!",tip:"1. + 3. Ton."},
+    {char:"看",pinyin:"Kàn",de:"Schau!",ex_cn:"你看，多漂亮！",ex_de:"Schau, wie schön!",tip:"4. Ton — scharf fallend."},
+    {char:"跑",pinyin:"Pǎo",de:"Rennen",ex_cn:"我们一起跑步吧！",ex_de:"Lass uns zusammen joggen!",tip:"3. Ton. P stark aspiriert."},
+    {char:"起来",pinyin:"Qǐlái",de:"Aufstehen",ex_cn:"快起来！太阳出来了！",ex_de:"Steh auf! Die Sonne scheint!",tip:"3. + 2. Ton."},
+    {char:"洗手",pinyin:"Xǐshǒu",de:"Hände waschen",ex_cn:"吃饭前要洗手。",ex_de:"Vor dem Essen Hände waschen.",tip:"Tonsandhi: xí shǒu."},
+    {char:"上厕所",pinyin:"Shàng cèsuǒ",de:"Zur Toilette",ex_cn:"我要上厕所。",ex_de:"Ich muss auf die Toilette.",tip:"4. + 4. + 3. Ton."},
+  ]},,
+  {block:5,title:"Partikel & Struktur",color:"#5B8EC4",group:"Grammatik",words:[
+      {char:"的",pinyin:"de",de:"Besitz-Partikel (wie: von)",ex_cn:"这是我的书。",ex_de:"Das ist mein Buch.",tip:"Neutraler Ton — kurz und unbetont."},
+      {char:"了",pinyin:"le",de:"Abschluss-Partikel",ex_cn:"我吃了。",ex_de:"Ich habe gegessen.",tip:"Neutraler Ton — kurz und unbetont."},
+      {char:"吗",pinyin:"ma",de:"Frage-Partikel",ex_cn:"你好吗？",ex_de:"Wie geht es dir?",tip:"Neutraler Ton — kurz und unbetont."},
+      {char:"呢",pinyin:"ne",de:"und du? / wie steht's?",ex_cn:"你呢？",ex_de:"Und du?",tip:"Neutraler Ton — kurz und unbetont."},
+      {char:"也",pinyin:"yě",de:"auch",ex_cn:"我也喜欢。",ex_de:"Ich mag das auch.",tip:"3. Ton — erst tief, dann steigend."},
+      {char:"都",pinyin:"dōu",de:"alle / beide",ex_cn:"我们都去。",ex_de:"Wir gehen alle.",tip:"1. Ton — hoch und gleichmäßig."},
+      {char:"很",pinyin:"hěn",de:"sehr",ex_cn:"很好！",ex_de:"Sehr gut!",tip:"3. Ton — erst tief, dann steigend."},
+      {char:"太",pinyin:"tài",de:"zu (übermäßig)",ex_cn:"太贵了！",ex_de:"Zu teuer!",tip:"4. Ton — scharf fallend."},
+      {char:"非常",pinyin:"fēicháng",de:"extrem / äußerst",ex_cn:"非常好吃！",ex_de:"Extrem lecker!",tip:"1. Ton + 2. Ton. Ch ist retroflex — Zunge nach oben biegen."},
+      {char:"还",pinyin:"hái",de:"noch / auch / bereits",ex_cn:"你还要吗？",ex_de:"Willst du noch mehr?",tip:"2. Ton — steigend wie eine Frage."},
+      {char:"就",pinyin:"jiù",de:"dann / genau / eben",ex_cn:"我就来！",ex_de:"Ich komme gleich!",tip:"4. Ton — scharf fallend. J klingt wie weiches dsch."},
+      {char:"再",pinyin:"zài",de:"nochmal / wieder",ex_cn:"再见！再来一次。",ex_de:"Tschüss! Noch einmal.",tip:"4. Ton — scharf fallend. Z = stimmhaftes Ds."},
+      {char:"只",pinyin:"zhǐ",de:"nur",ex_cn:"一只猫。",ex_de:"Eine Katze.",tip:"3. Ton — erst tief, dann steigend. Zh ist retroflex — Zunge nach oben biegen."}
   ]},
+  {block:6,title:"Verbinder & Modalverben",color:"#4A7AB5",group:"Grammatik",words:[
+      {char:"和",pinyin:"hé",de:"und",ex_cn:"我和你。",ex_de:"Ich und du.",tip:"2. Ton — steigend wie eine Frage."},
+      {char:"但是",pinyin:"dànshì",de:"aber",ex_cn:"好吃，但是太贵。",ex_de:"Lecker, aber zu teuer.",tip:"4. Ton + 4. Ton. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"因为",pinyin:"yīnwèi",de:"weil",ex_cn:"因为下雨了。",ex_de:"Weil es regnet.",tip:"1. Ton + 4. Ton."},
+      {char:"所以",pinyin:"suǒyǐ",de:"deshalb",ex_cn:"所以我们回家。",ex_de:"Deshalb gehen wir heim.",tip:"3. Ton + 3. Ton."},
+      {char:"如果",pinyin:"rúguǒ",de:"wenn / falls",ex_cn:"如果你来，我很高兴。",ex_de:"Wenn du kommst, freue ich mich.",tip:"2. Ton + 3. Ton."},
+      {char:"虽然",pinyin:"suīrán",de:"obwohl",ex_cn:"虽然累，但是开心。",ex_de:"Obwohl müde, aber glücklich.",tip:"1. Ton + 2. Ton."},
+      {char:"已经",pinyin:"yǐjīng",de:"schon / bereits",ex_cn:"已经到了。",ex_de:"Schon angekommen.",tip:"3. Ton + 1. Ton."},
+      {char:"可以",pinyin:"kěyǐ",de:"können / dürfen",ex_cn:"可以坐这里吗？",ex_de:"Darf ich hier sitzen?",tip:"3. Ton + 3. Ton."},
+      {char:"应该",pinyin:"yīnggāi",de:"sollen",ex_cn:"你应该休息。",ex_de:"Du solltest dich ausruhen.",tip:"1. Ton + 1. Ton."},
+      {char:"需要",pinyin:"xūyào",de:"brauchen / müssen",ex_cn:"我需要帮助。",ex_de:"Ich brauche Hilfe.",tip:"1. Ton + 4. Ton. X klingt wie sch vor i."},
+      {char:"想",pinyin:"xiǎng",de:"wollen / denken",ex_cn:"我想吃面条。",ex_de:"Ich will Nudeln essen.",tip:"3. Ton — erst tief, dann steigend. X klingt wie sch vor i."},
+      {char:"有",pinyin:"yǒu",de:"haben / es gibt",ex_cn:"你有时间吗？",ex_de:"Hast du Zeit?",tip:"3. Ton — erst tief, dann steigend."},
+      {char:"在",pinyin:"zài",de:"in / an / sich befinden",ex_cn:"你在哪里？",ex_de:"Wo bist du?",tip:"4. Ton — scharf fallend. Z = stimmhaftes Ds."},
+      {char:"没",pinyin:"méi",de:"nicht haben / nicht (Vergangenheit)",ex_cn:"没问题！",ex_de:"Kein Problem!",tip:"2. Ton — steigend wie eine Frage."},
+      {char:"是",pinyin:"shì",de:"sein",ex_cn:"他是我朋友。",ex_de:"Er ist mein Freund.",tip:"4. Ton — scharf fallend. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"不",pinyin:"bù",de:"nein / nicht",ex_cn:"不知道。",ex_de:"Weiß ich nicht.",tip:"4. Ton — scharf fallend."}
+  ]},
+  {block:7,title:"Bewegung",color:"#3DAA6D",group:"Verben",words:[
+      {char:"去",pinyin:"qù",de:"gehen",ex_cn:"我们去公园吧。",ex_de:"Lass uns in den Park gehen.",tip:"4. Ton — scharf fallend. Q klingt wie tch vor i."},
+      {char:"来",pinyin:"lái",de:"kommen",ex_cn:"你来吗？",ex_de:"Kommst du?",tip:"2. Ton — steigend wie eine Frage."},
+      {char:"回",pinyin:"huí",de:"zurückkehren",ex_cn:"我要回家。",ex_de:"Ich will nach Hause.",tip:"2. Ton — steigend wie eine Frage."},
+      {char:"走",pinyin:"zǒu",de:"laufen / weggehen",ex_cn:"我们走吧！",ex_de:"Lass uns gehen!",tip:"3. Ton — erst tief, dann steigend. Z = stimmhaftes Ds."},
+      {char:"跑",pinyin:"pǎo",de:"rennen",ex_cn:"他跑得很快。",ex_de:"Er läuft sehr schnell.",tip:"3. Ton — erst tief, dann steigend."},
+      {char:"进",pinyin:"jìn",de:"eintreten / reingehen",ex_cn:"请进！",ex_de:"Bitte komm rein!",tip:"4. Ton — scharf fallend. J klingt wie weiches dsch."},
+      {char:"出",pinyin:"chū",de:"rausgehen",ex_cn:"出去玩吧。",ex_de:"Lass uns rausgehen.",tip:"1. Ton — hoch und gleichmäßig. Ch ist retroflex — Zunge nach oben biegen."},
+      {char:"上",pinyin:"shàng",de:"hochgehen / einsteigen",ex_cn:"上楼。",ex_de:"Nach oben gehen.",tip:"4. Ton — scharf fallend. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"下",pinyin:"xià",de:"runtergehen / aussteigen",ex_cn:"下车。",ex_de:"Aussteigen.",tip:"4. Ton — scharf fallend. X klingt wie sch vor i."},
+      {char:"过",pinyin:"guò",de:"passieren / überqueren",ex_cn:"过马路要小心。",ex_de:"Beim Straßeüberqueren aufpassen.",tip:"4. Ton — scharf fallend."},
+      {char:"到",pinyin:"dào",de:"ankommen / erreichen",ex_cn:"你到了吗？",ex_de:"Bist du angekommen?",tip:"4. Ton — scharf fallend."},
+      {char:"带",pinyin:"dài",de:"mitbringen / mitnehmen",ex_cn:"带孩子去公园。",ex_de:"Die Kinder in den Park bringen.",tip:"4. Ton — scharf fallend."},
+      {char:"送",pinyin:"sòng",de:"schicken / bringen",ex_cn:"我送你回家。",ex_de:"Ich bringe dich nach Hause.",tip:"4. Ton — scharf fallend."},
+      {char:"坐",pinyin:"zuò",de:"sitzen / fahren mit",ex_cn:"请坐！",ex_de:"Bitte setz dich!",tip:"4. Ton — scharf fallend. Z = stimmhaftes Ds."},
+      {char:"开",pinyin:"kāi",de:"öffnen / fahren / starten",ex_cn:"开门。",ex_de:"Mach die Tür auf.",tip:"1. Ton — hoch und gleichmäßig."}
+  ]},
+  {block:8,title:"Kommunikation",color:"#2D9A7A",group:"Verben",words:[
+      {char:"说",pinyin:"shuō",de:"sprechen / sagen",ex_cn:"你说什么？",ex_de:"Was hast du gesagt?",tip:"1. Ton — hoch und gleichmäßig. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"问",pinyin:"wèn",de:"fragen",ex_cn:"我想问一下。",ex_de:"Ich möchte kurz fragen.",tip:"4. Ton — scharf fallend."},
+      {char:"回答",pinyin:"huídá",de:"antworten",ex_cn:"请回答我。",ex_de:"Bitte antworte mir.",tip:"2. Ton + 2. Ton."},
+      {char:"告诉",pinyin:"gàosu",de:"erzählen / sagen",ex_cn:"告诉我！",ex_de:"Sag es mir!",tip:"4. Ton — scharf fallend."},
+      {char:"叫",pinyin:"jiào",de:"rufen / heißen",ex_cn:"你叫什么名字？",ex_de:"Wie heißt du?",tip:"4. Ton — scharf fallend. J klingt wie weiches dsch."},
+      {char:"听",pinyin:"tīng",de:"zuhören / hören",ex_cn:"你听！",ex_de:"Hör mal!",tip:"1. Ton — hoch und gleichmäßig."},
+      {char:"看",pinyin:"kàn",de:"schauen / lesen",ex_cn:"你看这个！",ex_de:"Schau dir das an!",tip:"4. Ton — scharf fallend."},
+      {char:"写",pinyin:"xiě",de:"schreiben",ex_cn:"请写下来。",ex_de:"Bitte schreib es auf.",tip:"3. Ton — erst tief, dann steigend. X klingt wie sch vor i."},
+      {char:"读",pinyin:"dú",de:"vorlesen",ex_cn:"读这个字。",ex_de:"Lies dieses Zeichen.",tip:"2. Ton — steigend wie eine Frage."},
+      {char:"聊",pinyin:"liáo",de:"plaudern",ex_cn:"我们聊聊吧。",ex_de:"Lass uns plaudern.",tip:"2. Ton — steigend wie eine Frage."},
+      {char:"打电话",pinyin:"dǎ diànhuà",de:"telefonieren",ex_cn:"我给你打电话。",ex_de:"Ich rufe dich an.",tip:"3. Ton + 4. Ton + 4. Ton."}
+  ]},
+  {block:9,title:"Alltag 1",color:"#45A076",group:"Verben",words:[
+      {char:"吃",pinyin:"chī",de:"essen",ex_cn:"你想吃什么？",ex_de:"Was willst du essen?",tip:"1. Ton — hoch und gleichmäßig. Ch ist retroflex — Zunge nach oben biegen."},
+      {char:"喝",pinyin:"hē",de:"trinken",ex_cn:"喝点水吧。",ex_de:"Trink etwas Wasser.",tip:"1. Ton — hoch und gleichmäßig."},
+      {char:"买",pinyin:"mǎi",de:"kaufen",ex_cn:"我要买这个。",ex_de:"Ich will das kaufen.",tip:"3. Ton — erst tief, dann steigend."},
+      {char:"卖",pinyin:"mài",de:"verkaufen",ex_cn:"这里卖什么？",ex_de:"Was wird hier verkauft?",tip:"4. Ton — scharf fallend."},
+      {char:"用",pinyin:"yòng",de:"benutzen",ex_cn:"用筷子吃饭。",ex_de:"Mit Stäbchen essen.",tip:"4. Ton — scharf fallend."},
+      {char:"做",pinyin:"zuò",de:"machen / tun",ex_cn:"你在做什么？",ex_de:"Was machst du gerade?",tip:"4. Ton — scharf fallend. Z = stimmhaftes Ds."},
+      {char:"工作",pinyin:"gōngzuò",de:"arbeiten",ex_cn:"我在工作。",ex_de:"Ich arbeite.",tip:"1. Ton + 4. Ton."},
+      {char:"学习",pinyin:"xuéxí",de:"lernen / studieren",ex_cn:"我在学习中文。",ex_de:"Ich lerne Chinesisch.",tip:"2. Ton + 2. Ton. X klingt wie sch vor i."},
+      {char:"睡觉",pinyin:"shuìjiào",de:"schlafen",ex_cn:"该睡觉了。",ex_de:"Zeit zum Schlafen.",tip:"4. Ton + 4. Ton. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"起床",pinyin:"qǐchuáng",de:"aufstehen",ex_cn:"快起床！",ex_de:"Steh schnell auf!",tip:"3. Ton + 2. Ton. Ch ist retroflex — Zunge nach oben biegen."},
+      {char:"洗澡",pinyin:"xǐzǎo",de:"duschen / baden",ex_cn:"我去洗澡。",ex_de:"Ich gehe duschen.",tip:"3. Ton + 3. Ton. X klingt wie sch vor i."},
+      {char:"穿",pinyin:"chuān",de:"anziehen / tragen",ex_cn:"今天穿什么？",ex_de:"Was ziehst du heute an?",tip:"1. Ton — hoch und gleichmäßig. Ch ist retroflex — Zunge nach oben biegen."},
+      {char:"换",pinyin:"huàn",de:"wechseln / tauschen",ex_cn:"换衣服。",ex_de:"Sich umziehen.",tip:"4. Ton — scharf fallend."},
+      {char:"打",pinyin:"dǎ",de:"schlagen / spielen / tippen",ex_cn:"打篮球。",ex_de:"Basketball spielen.",tip:"3. Ton — erst tief, dann steigend."}
+  ]},
+  {block:10,title:"Alltag 2",color:"#3D8A6A",group:"Verben",words:[
+      {char:"等",pinyin:"děng",de:"warten",ex_cn:"等一下！",ex_de:"Warte mal!",tip:"3. Ton — erst tief, dann steigend."},
+      {char:"找",pinyin:"zhǎo",de:"suchen / finden",ex_cn:"我在找手机。",ex_de:"Ich suche mein Handy.",tip:"3. Ton — erst tief, dann steigend. Zh ist retroflex — Zunge nach oben biegen."},
+      {char:"拿",pinyin:"ná",de:"nehmen / halten",ex_cn:"请拿着。",ex_de:"Bitte nimm das.",tip:"2. Ton — steigend wie eine Frage."},
+      {char:"放",pinyin:"fàng",de:"legen / stellen",ex_cn:"放在桌子上。",ex_de:"Leg es auf den Tisch.",tip:"4. Ton — scharf fallend."},
+      {char:"给",pinyin:"gěi",de:"geben / für",ex_cn:"给你！",ex_de:"Hier, für dich!",tip:"3. Ton — erst tief, dann steigend."},
+      {char:"付",pinyin:"fù",de:"bezahlen",ex_cn:"我来付钱。",ex_de:"Ich bezahle.",tip:"4. Ton — scharf fallend."},
+      {char:"开始",pinyin:"kāishǐ",de:"anfangen",ex_cn:"开始了！",ex_de:"Es geht los!",tip:"1. Ton + 3. Ton. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"结束",pinyin:"jiéshù",de:"beenden / fertig",ex_cn:"会议结束了。",ex_de:"Die Besprechung ist vorbei.",tip:"2. Ton + 4. Ton. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"帮",pinyin:"bāng",de:"helfen",ex_cn:"帮帮我！",ex_de:"Hilf mir!",tip:"1. Ton — hoch und gleichmäßig."},
+      {char:"借",pinyin:"jiè",de:"ausleihen / verleihen",ex_cn:"可以借我看看吗？",ex_de:"Darf ich mir das ausleihen?",tip:"4. Ton — scharf fallend. J klingt wie weiches dsch."},
+      {char:"还",pinyin:"huán",de:"zurückgeben",ex_cn:"我还你钱。",ex_de:"Ich gebe dir das Geld zurück.",tip:"2. Ton — steigend. Achtung: hái = noch, huán = zurückgeben!"},
+      {char:"试",pinyin:"shì",de:"versuchen / probieren",ex_cn:"试试看！",ex_de:"Probier mal!",tip:"4. Ton — scharf fallend. Sh ist retroflex — Zunge nach oben biegen."}
+  ]},
+  {block:11,title:"Denken & Fühlen",color:"#5B9A6D",group:"Verben",words:[
+      {char:"喜欢",pinyin:"xǐhuān",de:"mögen",ex_cn:"我喜欢你。",ex_de:"Ich mag dich.",tip:"3. Ton + 1. Ton. X klingt wie sch vor i."},
+      {char:"爱",pinyin:"ài",de:"lieben",ex_cn:"我爱你。",ex_de:"Ich liebe dich.",tip:"4. Ton — scharf fallend."},
+      {char:"认识",pinyin:"rènshi",de:"kennen (Person)",ex_cn:"认识你很高兴。",ex_de:"Freut mich, dich kennenzulernen.",tip:"4. Ton — scharf fallend. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"知道",pinyin:"zhīdào",de:"wissen (Fakt)",ex_cn:"我知道了。",ex_de:"Ich weiß Bescheid.",tip:"1. Ton + 4. Ton. Zh ist retroflex — Zunge nach oben biegen."},
+      {char:"记得",pinyin:"jìde",de:"sich erinnern",ex_cn:"你记得吗？",ex_de:"Erinnerst du dich?",tip:"4. Ton — scharf fallend. J klingt wie weiches dsch."},
+      {char:"忘",pinyin:"wàng",de:"vergessen",ex_cn:"我忘了！",ex_de:"Ich hab's vergessen!",tip:"4. Ton — scharf fallend."},
+      {char:"觉得",pinyin:"juéde",de:"fühlen / meinen",ex_cn:"你觉得怎么样？",ex_de:"Was meinst du?",tip:"2. Ton — steigend wie eine Frage. J klingt wie weiches dsch."},
+      {char:"希望",pinyin:"xīwàng",de:"hoffen",ex_cn:"我希望明天天气好。",ex_de:"Ich hoffe, morgen ist schönes Wetter.",tip:"1. Ton + 4. Ton. X klingt wie sch vor i."},
+      {char:"担心",pinyin:"dānxīn",de:"sich sorgen",ex_cn:"别担心！",ex_de:"Mach dir keine Sorgen!",tip:"1. Ton + 1. Ton."},
+      {char:"笑",pinyin:"xiào",de:"lachen / lächeln",ex_cn:"他在笑。",ex_de:"Er lacht.",tip:"4. Ton — scharf fallend. X klingt wie sch vor i."},
+      {char:"哭",pinyin:"kū",de:"weinen",ex_cn:"别哭了。",ex_de:"Hör auf zu weinen.",tip:"1. Ton — hoch und gleichmäßig."},
+      {char:"看见",pinyin:"kànjiàn",de:"sehen",ex_cn:"我看见他了。",ex_de:"Ich habe ihn gesehen.",tip:"4. Ton + 4. Ton."},
+      {char:"听见",pinyin:"tīngjiàn",de:"hören",ex_cn:"你听见了吗？",ex_de:"Hast du das gehört?",tip:"1. Ton + 4. Ton."}
+  ]},
+  {block:12,title:"Praktisch",color:"#6B9A5B",group:"Verben",words:[
+      {char:"请",pinyin:"qǐng",de:"bitte / einladen",ex_cn:"请帮帮我。",ex_de:"Bitte hilf mir.",tip:"3. Ton — erst tief, dann steigend. Q klingt wie tch vor i."},
+      {char:"准备",pinyin:"zhǔnbèi",de:"vorbereiten",ex_cn:"准备好了吗？",ex_de:"Bist du bereit?",tip:"3. Ton + 4. Ton. Zh ist retroflex — Zunge nach oben biegen."},
+      {char:"计划",pinyin:"jìhuà",de:"planen",ex_cn:"你有什么计划？",ex_de:"Was hast du vor?",tip:"4. Ton + 4. Ton. J klingt wie weiches dsch."},
+      {char:"订",pinyin:"dìng",de:"buchen / bestellen",ex_cn:"我要订一张票。",ex_de:"Ich möchte ein Ticket buchen.",tip:"4. Ton — scharf fallend."},
+      {char:"检查",pinyin:"jiǎnchá",de:"überprüfen",ex_cn:"检查一下。",ex_de:"Überprüf das mal.",tip:"3. Ton + 2. Ton. Ch ist retroflex — Zunge nach oben biegen."},
+      {char:"修",pinyin:"xiū",de:"reparieren",ex_cn:"帮我修一下。",ex_de:"Hilf mir, das zu reparieren.",tip:"1. Ton — hoch und gleichmäßig. X klingt wie sch vor i."},
+      {char:"关",pinyin:"guān",de:"schließen / ausschalten",ex_cn:"关门！",ex_de:"Mach die Tür zu!",tip:"1. Ton — hoch und gleichmäßig."},
+      {char:"打开",pinyin:"dǎkāi",de:"öffnen / anschalten",ex_cn:"打开窗户。",ex_de:"Mach das Fenster auf.",tip:"3. Ton + 1. Ton."},
+      {char:"成为",pinyin:"chéngwéi",de:"werden",ex_cn:"我想成为老师。",ex_de:"Ich möchte Lehrer werden.",tip:"2. Ton + 2. Ton. Ch ist retroflex — Zunge nach oben biegen."},
+      {char:"属于",pinyin:"shǔyú",de:"gehören zu",ex_cn:"这属于谁？",ex_de:"Wem gehört das?",tip:"3. Ton + 2. Ton. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"玩",pinyin:"wán",de:"spielen / Spaß haben",ex_cn:"出去玩吧！",ex_de:"Lass uns rausgehen!",tip:"2. Ton — steigend wie eine Frage."}
+  ]},
+  {block:13,title:"Personen",color:"#D48A4A",group:"Nomen",words:[
+      {char:"人",pinyin:"rén",de:"Person / Mensch",ex_cn:"那个人是谁？",ex_de:"Wer ist die Person?",tip:"2. Ton — steigend wie eine Frage."},
+      {char:"朋友",pinyin:"péngyǒu",de:"Freund/in",ex_cn:"他是我的好朋友。",ex_de:"Er ist mein guter Freund.",tip:"2. Ton + 3. Ton."},
+      {char:"家人",pinyin:"jiārén",de:"Familie",ex_cn:"家人最重要。",ex_de:"Die Familie ist am wichtigsten.",tip:"1. Ton + 2. Ton. J klingt wie weiches dsch."},
+      {char:"父母",pinyin:"fùmǔ",de:"Eltern",ex_cn:"父母在家。",ex_de:"Die Eltern sind zu Hause.",tip:"4. Ton + 3. Ton."},
+      {char:"爸爸",pinyin:"bàba",de:"Papa",ex_cn:"爸爸回来了！",ex_de:"Papa ist zurück!",tip:"4. Ton — scharf fallend."},
+      {char:"妈妈",pinyin:"māma",de:"Mama",ex_cn:"妈妈做的菜最好吃。",ex_de:"Mamas Essen schmeckt am besten.",tip:"1. Ton — hoch und gleichmäßig."},
+      {char:"孩子",pinyin:"háizi",de:"Kind",ex_cn:"孩子在玩。",ex_de:"Die Kinder spielen.",tip:"2. Ton — steigend wie eine Frage."},
+      {char:"男朋友",pinyin:"nán péngyǒu",de:"Freund",ex_cn:"你有男朋友吗？",ex_de:"Hast du einen Freund?",tip:"2. Ton + 2. Ton + 3. Ton."},
+      {char:"女朋友",pinyin:"nǚ péngyǒu",de:"Freundin",ex_cn:"她是我女朋友。",ex_de:"Sie ist meine Freundin.",tip:"3. Ton + 2. Ton + 3. Ton."},
+      {char:"老师",pinyin:"lǎoshī",de:"Lehrer/in",ex_cn:"老师好！",ex_de:"Hallo, Lehrer!",tip:"3. Ton + 1. Ton. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"同事",pinyin:"tóngshì",de:"Kollege/in",ex_cn:"他是我同事。",ex_de:"Er ist mein Kollege.",tip:"2. Ton + 4. Ton. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"老板",pinyin:"lǎobǎn",de:"Chef/in",ex_cn:"老板来了。",ex_de:"Der Chef kommt.",tip:"3. Ton + 3. Ton."},
+      {char:"服务员",pinyin:"fúwùyuán",de:"Bedienung",ex_cn:"服务员，买单！",ex_de:"Bedienung, die Rechnung bitte!",tip:"2. Ton + 4. Ton + 2. Ton."},
+      {char:"医生",pinyin:"yīshēng",de:"Arzt / Ärztin",ex_cn:"去看医生。",ex_de:"Zum Arzt gehen.",tip:"1. Ton + 1. Ton. Sh ist retroflex — Zunge nach oben biegen."}
+  ]},
+  {block:14,title:"Pronomen & Richtung",color:"#C47A5A",group:"Nomen",words:[
+      {char:"我",pinyin:"wǒ",de:"ich / mich",ex_cn:"我是德国人。",ex_de:"Ich bin Deutscher.",tip:"3. Ton — erst tief, dann steigend."},
+      {char:"你",pinyin:"nǐ",de:"du / dich",ex_cn:"你好吗？",ex_de:"Wie geht es dir?",tip:"3. Ton — erst tief, dann steigend."},
+      {char:"他",pinyin:"tā",de:"er / ihn",ex_cn:"他在那里。",ex_de:"Er ist dort.",tip:"1. Ton — hoch und gleichmäßig."},
+      {char:"她",pinyin:"tā",de:"sie / ihr",ex_cn:"她很漂亮。",ex_de:"Sie ist hübsch.",tip:"1. Ton — hoch und gleichmäßig."},
+      {char:"我们",pinyin:"wǒmen",de:"wir / uns",ex_cn:"我们走吧！",ex_de:"Lass uns gehen!",tip:"3. Ton — erst tief, dann steigend."},
+      {char:"你们",pinyin:"nǐmen",de:"ihr (Plural)",ex_cn:"你们好！",ex_de:"Hallo zusammen!",tip:"3. Ton — erst tief, dann steigend."},
+      {char:"他们",pinyin:"tāmen",de:"sie (Plural)",ex_cn:"他们是朋友。",ex_de:"Sie sind Freunde.",tip:"1. Ton — hoch und gleichmäßig."},
+      {char:"这里",pinyin:"zhèlǐ",de:"hier",ex_cn:"这里很好。",ex_de:"Hier ist es schön.",tip:"4. Ton + 3. Ton. Zh ist retroflex — Zunge nach oben biegen."},
+      {char:"那里",pinyin:"nàlǐ",de:"dort",ex_cn:"去那里。",ex_de:"Geh dorthin.",tip:"4. Ton + 3. Ton."},
+      {char:"哪里",pinyin:"nǎlǐ",de:"wo",ex_cn:"你去哪里？",ex_de:"Wo gehst du hin?",tip:"3. Ton + 3. Ton."},
+      {char:"楼上",pinyin:"lóushàng",de:"oben / Obergeschoss",ex_cn:"在楼上。",ex_de:"Oben (im Gebäude).",tip:"2. Ton + 4. Ton. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"楼下",pinyin:"lóuxià",de:"unten / Untergeschoss",ex_cn:"楼下有超市。",ex_de:"Unten gibt es einen Supermarkt.",tip:"2. Ton + 4. Ton."}
+  ]},
+  {block:15,title:"Orte",color:"#B87050",group:"Nomen",words:[
+      {char:"家",pinyin:"jiā",de:"Zuhause",ex_cn:"我在家。",ex_de:"Ich bin zu Hause.",tip:"1. Ton — hoch und gleichmäßig. J klingt wie weiches dsch."},
+      {char:"学校",pinyin:"xuéxiào",de:"Schule",ex_cn:"孩子去学校了。",ex_de:"Das Kind ist in die Schule gegangen.",tip:"2. Ton + 4. Ton. X klingt wie sch vor i."},
+      {char:"公司",pinyin:"gōngsī",de:"Firma",ex_cn:"我在公司上班。",ex_de:"Ich arbeite in einer Firma.",tip:"1. Ton + 1. Ton."},
+      {char:"医院",pinyin:"yīyuàn",de:"Krankenhaus",ex_cn:"去医院看病。",ex_de:"Ins Krankenhaus gehen.",tip:"1. Ton + 4. Ton."},
+      {char:"餐厅",pinyin:"cāntīng",de:"Restaurant",ex_cn:"我们去餐厅吃饭。",ex_de:"Lass uns im Restaurant essen.",tip:"1. Ton + 1. Ton. C = scharfes Ts."},
+      {char:"超市",pinyin:"chāoshì",de:"Supermarkt",ex_cn:"去超市买东西。",ex_de:"Im Supermarkt einkaufen.",tip:"1. Ton + 4. Ton. Ch/Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"商店",pinyin:"shāngdiàn",de:"Laden / Geschäft",ex_cn:"商店几点关门？",ex_de:"Wann schließt der Laden?",tip:"1. Ton + 4. Ton. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"银行",pinyin:"yínháng",de:"Bank",ex_cn:"银行在哪里？",ex_de:"Wo ist die Bank?",tip:"2. Ton + 2. Ton."},
+      {char:"酒店",pinyin:"jiǔdiàn",de:"Hotel",ex_cn:"酒店很漂亮。",ex_de:"Das Hotel ist schön.",tip:"3. Ton + 4. Ton. J klingt wie weiches dsch."},
+      {char:"厕所",pinyin:"cèsuǒ",de:"Toilette",ex_cn:"厕所在哪里？",ex_de:"Wo ist die Toilette?",tip:"4. Ton + 3. Ton. C = scharfes Ts."},
+      {char:"公园",pinyin:"gōngyuán",de:"Park",ex_cn:"公园里很安静。",ex_de:"Im Park ist es ruhig.",tip:"1. Ton + 2. Ton."},
+      {char:"街道",pinyin:"jiēdào",de:"Straße",ex_cn:"这条街道很长。",ex_de:"Diese Straße ist lang.",tip:"1. Ton + 4. Ton. J klingt wie weiches dsch."},
+      {char:"路口",pinyin:"lùkǒu",de:"Kreuzung",ex_cn:"在路口左转。",ex_de:"An der Kreuzung links abbiegen.",tip:"4. Ton + 3. Ton."}
+  ]},
+  {block:16,title:"Zeit",color:"#D4904A",group:"Nomen",words:[
+      {char:"现在",pinyin:"xiànzài",de:"jetzt",ex_cn:"现在几点？",ex_de:"Wie spät ist es jetzt?",tip:"4. Ton + 4. Ton. X klingt wie sch vor i."},
+      {char:"今天",pinyin:"jīntiān",de:"heute",ex_cn:"今天星期几？",ex_de:"Welcher Tag ist heute?",tip:"1. Ton + 1. Ton. J klingt wie weiches dsch."},
+      {char:"明天",pinyin:"míngtiān",de:"morgen",ex_cn:"明天见！",ex_de:"Bis morgen!",tip:"2. Ton + 1. Ton."},
+      {char:"昨天",pinyin:"zuótiān",de:"gestern",ex_cn:"昨天很忙。",ex_de:"Gestern war viel los.",tip:"2. Ton + 1. Ton. Z = stimmhaftes Ds."},
+      {char:"早上",pinyin:"zǎoshang",de:"Morgen / Vormittag",ex_cn:"早上好！",ex_de:"Guten Morgen!",tip:"3. Ton — erst tief, dann steigend. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"下午",pinyin:"xiàwǔ",de:"Nachmittag",ex_cn:"下午三点。",ex_de:"Um drei Uhr nachmittags.",tip:"4. Ton + 3. Ton. X klingt wie sch vor i."},
+      {char:"晚上",pinyin:"wǎnshang",de:"Abend",ex_cn:"晚上好！",ex_de:"Guten Abend!",tip:"3. Ton — erst tief, dann steigend. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"小时",pinyin:"xiǎoshí",de:"Stunde",ex_cn:"一个小时。",ex_de:"Eine Stunde.",tip:"3. Ton + 2. Ton. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"分钟",pinyin:"fēnzhōng",de:"Minute",ex_cn:"五分钟。",ex_de:"Fünf Minuten.",tip:"1. Ton + 1. Ton. Zh ist retroflex — Zunge nach oben biegen."},
+      {char:"星期",pinyin:"xīngqī",de:"Woche",ex_cn:"星期一。",ex_de:"Montag.",tip:"1. Ton + 1. Ton. X klingt wie sch vor i."},
+      {char:"月",pinyin:"yuè",de:"Monat",ex_cn:"三月。",ex_de:"März.",tip:"4. Ton — scharf fallend."},
+      {char:"年",pinyin:"nián",de:"Jahr",ex_cn:"新年快乐！",ex_de:"Frohes neues Jahr!",tip:"2. Ton — steigend wie eine Frage."},
+      {char:"以前",pinyin:"yǐqián",de:"vorher / früher",ex_cn:"以前我住在北京。",ex_de:"Früher wohnte ich in Peking.",tip:"3. Ton + 2. Ton."},
+      {char:"以后",pinyin:"yǐhòu",de:"danach / später",ex_cn:"以后再说吧。",ex_de:"Darüber reden wir später.",tip:"3. Ton + 4. Ton."},
+      {char:"刚才",pinyin:"gāngcái",de:"gerade eben",ex_cn:"刚才谁来了？",ex_de:"Wer war gerade da?",tip:"1. Ton + 2. Ton."},
+      {char:"马上",pinyin:"mǎshàng",de:"sofort",ex_cn:"我马上来！",ex_de:"Ich komme sofort!",tip:"3. Ton + 4. Ton. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"经常",pinyin:"jīngcháng",de:"oft / häufig",ex_cn:"我经常去跑步。",ex_de:"Ich gehe oft joggen.",tip:"1. Ton + 2. Ton. Ch ist retroflex — Zunge nach oben biegen."},
+      {char:"有时候",pinyin:"yǒushíhòu",de:"manchmal",ex_cn:"有时候很累。",ex_de:"Manchmal bin ich müde.",tip:"3. Ton + 2. Ton + 4. Ton. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"从来",pinyin:"cónglái",de:"immer (mit 不/没: nie)",ex_cn:"我从来没去过。",ex_de:"Ich war noch nie dort.",tip:"2. Ton + 2. Ton. C = scharfes Ts."}
+  ]},
+  {block:17,title:"Essen (Nomen)",color:"#C89040",group:"Nomen",words:[
+      {char:"饭",pinyin:"fàn",de:"Reis / Mahlzeit",ex_cn:"吃饭了吗？",ex_de:"Hast du schon gegessen?",tip:"4. Ton — scharf fallend."},
+      {char:"面条",pinyin:"miàntiáo",de:"Nudeln",ex_cn:"来一碗面条。",ex_de:"Eine Schüssel Nudeln bitte.",tip:"4. Ton + 2. Ton."},
+      {char:"包子",pinyin:"bāozi",de:"Dampfbrötchen (Baozi)",ex_cn:"早上吃包子。",ex_de:"Morgens Dampfbrötchen essen.",tip:"1. Ton — hoch und gleichmäßig."},
+      {char:"菜",pinyin:"cài",de:"Gericht / Gemüse",ex_cn:"多吃菜。",ex_de:"Iss mehr Gemüse.",tip:"4. Ton — scharf fallend. C = scharfes Ts."},
+      {char:"肉",pinyin:"ròu",de:"Fleisch",ex_cn:"你吃肉吗？",ex_de:"Isst du Fleisch?",tip:"4. Ton — scharf fallend."},
+      {char:"鸡",pinyin:"jī",de:"Huhn / Hähnchen",ex_cn:"鸡肉很好吃。",ex_de:"Hähnchen schmeckt gut.",tip:"1. Ton — hoch und gleichmäßig. J klingt wie weiches dsch."},
+      {char:"鱼",pinyin:"yú",de:"Fisch",ex_cn:"今天吃鱼。",ex_de:"Heute gibt es Fisch.",tip:"2. Ton — steigend wie eine Frage."},
+      {char:"蛋",pinyin:"dàn",de:"Ei",ex_cn:"两个鸡蛋。",ex_de:"Zwei Eier.",tip:"4. Ton — scharf fallend."},
+      {char:"水果",pinyin:"shuǐguǒ",de:"Obst",ex_cn:"吃点水果吧。",ex_de:"Iss etwas Obst.",tip:"3. Ton + 3. Ton. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"水",pinyin:"shuǐ",de:"Wasser",ex_cn:"请给我一杯水。",ex_de:"Bitte ein Glas Wasser.",tip:"3. Ton — erst tief, dann steigend. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"茶",pinyin:"chá",de:"Tee",ex_cn:"喝茶吗？",ex_de:"Möchtest du Tee?",tip:"2. Ton — steigend wie eine Frage. Ch ist retroflex — Zunge nach oben biegen."},
+      {char:"咖啡",pinyin:"kāfēi",de:"Kaffee",ex_cn:"来杯咖啡。",ex_de:"Einen Kaffee bitte.",tip:"1. Ton + 1. Ton."},
+      {char:"啤酒",pinyin:"píjiǔ",de:"Bier",ex_cn:"来瓶啤酒！",ex_de:"Ein Bier bitte!",tip:"2. Ton + 3. Ton."},
+      {char:"菜单",pinyin:"càidān",de:"Speisekarte",ex_cn:"菜单在哪里？",ex_de:"Wo ist die Speisekarte?",tip:"4. Ton + 1. Ton. C = scharfes Ts."},
+      {char:"账单",pinyin:"zhàngdān",de:"Rechnung",ex_cn:"请给我账单。",ex_de:"Die Rechnung bitte.",tip:"4. Ton + 1. Ton. Zh ist retroflex — Zunge nach oben biegen."}
+  ]},
+  {block:18,title:"Unterwegs",color:"#D47050",group:"Nomen",words:[
+      {char:"车",pinyin:"chē",de:"Auto / Fahrzeug",ex_cn:"你开车吗？",ex_de:"Fährst du Auto?",tip:"1. Ton — hoch und gleichmäßig. Ch ist retroflex — Zunge nach oben biegen."},
+      {char:"公交车",pinyin:"gōngjiāo chē",de:"Bus",ex_cn:"坐公交车去。",ex_de:"Mit dem Bus fahren.",tip:"1. Ton + 1. Ton + 1. Ton. Ch ist retroflex — Zunge nach oben biegen."},
+      {char:"地铁",pinyin:"dìtiě",de:"U-Bahn",ex_cn:"坐地铁更快。",ex_de:"Mit der U-Bahn ist es schneller.",tip:"4. Ton + 3. Ton."},
+      {char:"出租车",pinyin:"chūzū chē",de:"Taxi",ex_cn:"打出租车。",ex_de:"Ein Taxi nehmen.",tip:"1. Ton + 1. Ton + 1. Ton. Ch ist retroflex — Zunge nach oben biegen."},
+      {char:"自行车",pinyin:"zìxíng chē",de:"Fahrrad",ex_cn:"骑自行车去。",ex_de:"Mit dem Fahrrad fahren.",tip:"4. Ton + 2. Ton + 1. Ton. Ch ist retroflex — Zunge nach oben biegen."},
+      {char:"票",pinyin:"piào",de:"Ticket / Fahrkarte",ex_cn:"买两张票。",ex_de:"Zwei Tickets kaufen.",tip:"4. Ton — scharf fallend."},
+      {char:"路",pinyin:"lù",de:"Straße / Weg",ex_cn:"这条路怎么走？",ex_de:"Wie komme ich auf diese Straße?",tip:"4. Ton — scharf fallend."},
+      {char:"地铁站",pinyin:"dìtiě zhàn",de:"U-Bahn-Station",ex_cn:"地铁站在那里。",ex_de:"Die U-Bahn-Station ist dort.",tip:"4. Ton + 3. Ton + 4. Ton. Zh ist retroflex — Zunge nach oben biegen."},
+      {char:"机场",pinyin:"jīchǎng",de:"Flughafen",ex_cn:"去机场。",ex_de:"Zum Flughafen.",tip:"1. Ton + 3. Ton. Ch ist retroflex — Zunge nach oben biegen."}
+  ]},
+  {block:19,title:"Körper & Gesundheit",color:"#B48060",group:"Nomen",words:[
+      {char:"头",pinyin:"tóu",de:"Kopf",ex_cn:"我头疼。",ex_de:"Ich habe Kopfschmerzen.",tip:"2. Ton — steigend wie eine Frage."},
+      {char:"眼睛",pinyin:"yǎnjing",de:"Augen",ex_cn:"闭上眼睛。",ex_de:"Mach die Augen zu.",tip:"3. Ton — erst tief, dann steigend."},
+      {char:"耳朵",pinyin:"ěrduǒ",de:"Ohren",ex_cn:"我的耳朵疼。",ex_de:"Mein Ohr tut weh.",tip:"3. Ton + 3. Ton."},
+      {char:"嘴",pinyin:"zuǐ",de:"Mund",ex_cn:"张开嘴。",ex_de:"Mach den Mund auf.",tip:"3. Ton — erst tief, dann steigend. Z = stimmhaftes Ds."},
+      {char:"手",pinyin:"shǒu",de:"Hand",ex_cn:"洗手！",ex_de:"Hände waschen!",tip:"3. Ton — erst tief, dann steigend. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"脚",pinyin:"jiǎo",de:"Fuß",ex_cn:"我的脚疼。",ex_de:"Mein Fuß tut weh.",tip:"3. Ton — erst tief, dann steigend. J klingt wie weiches dsch."},
+      {char:"肚子",pinyin:"dùzi",de:"Bauch / Magen",ex_cn:"肚子饿了。",ex_de:"Ich habe Hunger.",tip:"4. Ton — scharf fallend."},
+      {char:"背",pinyin:"bèi",de:"Rücken",ex_cn:"背疼。",ex_de:"Rücken tut weh.",tip:"4. Ton — scharf fallend."},
+      {char:"疼",pinyin:"téng",de:"Schmerz",ex_cn:"哪里疼？",ex_de:"Wo tut es weh?",tip:"2. Ton — steigend wie eine Frage."},
+      {char:"发烧",pinyin:"fāshāo",de:"Fieber",ex_cn:"孩子发烧了。",ex_de:"Das Kind hat Fieber.",tip:"1. Ton + 1. Ton. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"感冒",pinyin:"gǎnmào",de:"Erkältung",ex_cn:"我感冒了。",ex_de:"Ich bin erkältet.",tip:"3. Ton + 4. Ton."},
+      {char:"药",pinyin:"yào",de:"Medizin",ex_cn:"吃药了吗？",ex_de:"Hast du die Medizin genommen?",tip:"4. Ton — scharf fallend."}
+  ]},
+  {block:20,title:"Geld & Alltag",color:"#C48A60",group:"Nomen",words:[
+      {char:"钱",pinyin:"qián",de:"Geld",ex_cn:"多少钱？",ex_de:"Wie viel kostet das?",tip:"2. Ton — steigend wie eine Frage. Q klingt wie tch vor i."},
+      {char:"块",pinyin:"kuài",de:"Yuan (umgangssprachlich)",ex_cn:"十块钱。",ex_de:"Zehn Yuan.",tip:"4. Ton — scharf fallend."},
+      {char:"多少",pinyin:"duōshao",de:"wie viel / wie viele",ex_cn:"多少钱？",ex_de:"Wie viel?",tip:"1. Ton — hoch und gleichmäßig. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"便宜",pinyin:"piányí",de:"billig / günstig",ex_cn:"太便宜了！",ex_de:"Zu billig!",tip:"2. Ton + 2. Ton."},
+      {char:"贵",pinyin:"guì",de:"teuer",ex_cn:"太贵了！",ex_de:"Zu teuer!",tip:"4. Ton — scharf fallend."},
+      {char:"价格",pinyin:"jiàgé",de:"Preis",ex_cn:"价格是多少？",ex_de:"Was ist der Preis?",tip:"4. Ton + 2. Ton. J klingt wie weiches dsch."},
+      {char:"收据",pinyin:"shōujù",de:"Quittung",ex_cn:"请给我收据。",ex_de:"Bitte eine Quittung.",tip:"1. Ton + 4. Ton. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"事",pinyin:"shì",de:"Sache / Angelegenheit",ex_cn:"什么事？",ex_de:"Was ist los?",tip:"4. Ton — scharf fallend. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"问题",pinyin:"wèntí",de:"Problem / Frage",ex_cn:"有问题吗？",ex_de:"Gibt es ein Problem?",tip:"4. Ton + 2. Ton."},
+      {char:"时间",pinyin:"shíjiān",de:"Zeit",ex_cn:"没有时间。",ex_de:"Keine Zeit.",tip:"2. Ton + 1. Ton. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"地方",pinyin:"dìfang",de:"Ort / Platz",ex_cn:"这个地方很好。",ex_de:"Dieser Ort ist gut.",tip:"4. Ton — scharf fallend."},
+      {char:"东西",pinyin:"dōngxi",de:"Ding / Sachen",ex_cn:"买什么东西？",ex_de:"Was für Sachen kaufen?",tip:"1. Ton — hoch und gleichmäßig."},
+      {char:"方法",pinyin:"fāngfǎ",de:"Methode / Weg",ex_cn:"有没有别的方法？",ex_de:"Gibt es eine andere Methode?",tip:"1. Ton + 3. Ton."},
+      {char:"名字",pinyin:"míngzi",de:"Name",ex_cn:"你的名字是什么？",ex_de:"Was ist dein Name?",tip:"2. Ton — steigend wie eine Frage."},
+      {char:"号码",pinyin:"hàomǎ",de:"Nummer",ex_cn:"你的电话号码？",ex_de:"Deine Telefonnummer?",tip:"4. Ton + 3. Ton."},
+      {char:"电话",pinyin:"diànhuà",de:"Telefon",ex_cn:"打电话给我。",ex_de:"Ruf mich an.",tip:"4. Ton + 4. Ton."},
+      {char:"手机",pinyin:"shǒujī",de:"Handy",ex_cn:"我的手机在哪里？",ex_de:"Wo ist mein Handy?",tip:"3. Ton + 1. Ton. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"照片",pinyin:"zhàopiàn",de:"Foto",ex_cn:"拍张照片。",ex_de:"Mach ein Foto.",tip:"4. Ton + 4. Ton. Zh ist retroflex — Zunge nach oben biegen."},
+      {char:"行李",pinyin:"xíngli",de:"Gepäck",ex_cn:"我的行李在哪？",ex_de:"Wo ist mein Gepäck?",tip:"2. Ton — steigend wie eine Frage. X klingt wie sch vor i."},
+      {char:"天气",pinyin:"tiānqì",de:"Wetter",ex_cn:"今天天气怎么样？",ex_de:"Wie ist das Wetter heute?",tip:"1. Ton + 4. Ton."},
+      {char:"语言",pinyin:"yǔyán",de:"Sprache",ex_cn:"你会几种语言？",ex_de:"Wie viele Sprachen sprichst du?",tip:"3. Ton + 2. Ton."},
+      {char:"中文",pinyin:"zhōngwén",de:"Chinesisch",ex_cn:"我在学中文。",ex_de:"Ich lerne Chinesisch.",tip:"1. Ton + 2. Ton. Zh ist retroflex — Zunge nach oben biegen."}
+  ]},
+  {block:21,title:"Gegensätze",color:"#B45A8A",group:"Adjektive",words:[
+      {char:"好",pinyin:"hǎo",de:"gut",ex_cn:"好的！",ex_de:"Gut, okay!",tip:"3. Ton — erst tief, dann steigend."},
+      {char:"坏",pinyin:"huài",de:"schlecht",ex_cn:"不是坏人。",ex_de:"Kein schlechter Mensch.",tip:"4. Ton — scharf fallend."},
+      {char:"大",pinyin:"dà",de:"groß",ex_cn:"好大啊！",ex_de:"So groß!",tip:"4. Ton — scharf fallend."},
+      {char:"小",pinyin:"xiǎo",de:"klein",ex_cn:"太小了。",ex_de:"Zu klein.",tip:"3. Ton — erst tief, dann steigend. X klingt wie sch vor i."},
+      {char:"多",pinyin:"duō",de:"viel / viele",ex_cn:"人很多。",ex_de:"Viele Leute.",tip:"1. Ton — hoch und gleichmäßig."},
+      {char:"少",pinyin:"shǎo",de:"wenig",ex_cn:"太少了。",ex_de:"Zu wenig.",tip:"3. Ton — erst tief, dann steigend. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"长",pinyin:"cháng",de:"lang",ex_cn:"路很长。",ex_de:"Der Weg ist lang.",tip:"2. Ton — steigend wie eine Frage. Ch ist retroflex — Zunge nach oben biegen."},
+      {char:"短",pinyin:"duǎn",de:"kurz",ex_cn:"时间太短。",ex_de:"Die Zeit ist zu kurz.",tip:"3. Ton — erst tief, dann steigend."},
+      {char:"高",pinyin:"gāo",de:"groß / hoch",ex_cn:"他很高。",ex_de:"Er ist groß.",tip:"1. Ton — hoch und gleichmäßig."},
+      {char:"矮",pinyin:"ǎi",de:"klein (Körpergröße)",ex_cn:"那个桌子很矮。",ex_de:"Der Tisch ist niedrig.",tip:"3. Ton — erst tief, dann steigend."},
+      {char:"快",pinyin:"kuài",de:"schnell",ex_cn:"太快了！",ex_de:"Zu schnell!",tip:"4. Ton — scharf fallend."},
+      {char:"慢",pinyin:"màn",de:"langsam",ex_cn:"慢慢来。",ex_de:"Lass dir Zeit.",tip:"4. Ton — scharf fallend."},
+      {char:"新",pinyin:"xīn",de:"neu",ex_cn:"新衣服。",ex_de:"Neue Kleidung.",tip:"1. Ton — hoch und gleichmäßig. X klingt wie sch vor i."},
+      {char:"旧",pinyin:"jiù",de:"alt (Gegenstände)",ex_cn:"旧手机。",ex_de:"Altes Handy.",tip:"4. Ton — scharf fallend. J klingt wie weiches dsch."},
+      {char:"年轻",pinyin:"niánqīng",de:"jung",ex_cn:"她很年轻。",ex_de:"Sie ist jung.",tip:"2. Ton + 1. Ton."},
+      {char:"老",pinyin:"lǎo",de:"alt (Personen)",ex_cn:"老朋友。",ex_de:"Alter Freund.",tip:"3. Ton — erst tief, dann steigend."}
+  ]},
+  {block:22,title:"Gefühle & Zustände",color:"#A04A7A",group:"Adjektive",words:[
+      {char:"热",pinyin:"rè",de:"heiß",ex_cn:"今天很热。",ex_de:"Heute ist es heiß.",tip:"4. Ton — scharf fallend."},
+      {char:"冷",pinyin:"lěng",de:"kalt",ex_cn:"外面很冷。",ex_de:"Draußen ist es kalt.",tip:"3. Ton — erst tief, dann steigend."},
+      {char:"忙",pinyin:"máng",de:"beschäftigt",ex_cn:"你忙吗？",ex_de:"Bist du beschäftigt?",tip:"2. Ton — steigend wie eine Frage."},
+      {char:"累",pinyin:"lèi",de:"müde",ex_cn:"我好累。",ex_de:"Ich bin so müde.",tip:"4. Ton — scharf fallend."},
+      {char:"饿",pinyin:"è",de:"hungrig",ex_cn:"好饿啊！",ex_de:"So hungrig!",tip:"4. Ton — scharf fallend."},
+      {char:"渴",pinyin:"kě",de:"durstig",ex_cn:"我渴了。",ex_de:"Ich habe Durst.",tip:"3. Ton — erst tief, dann steigend."},
+      {char:"高兴",pinyin:"gāoxìng",de:"froh / glücklich",ex_cn:"我很高兴！",ex_de:"Ich bin froh!",tip:"1. Ton + 4. Ton."},
+      {char:"难过",pinyin:"nánguò",de:"traurig",ex_cn:"别难过。",ex_de:"Sei nicht traurig.",tip:"2. Ton + 4. Ton."},
+      {char:"生气",pinyin:"shēngqì",de:"wütend / sauer",ex_cn:"他生气了。",ex_de:"Er ist sauer.",tip:"1. Ton + 4. Ton. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"紧张",pinyin:"jǐnzhāng",de:"nervös / aufgeregt",ex_cn:"有点紧张。",ex_de:"Ein bisschen nervös.",tip:"3. Ton + 1. Ton. Zh ist retroflex — Zunge nach oben biegen."},
+      {char:"放松",pinyin:"fàngsōng",de:"entspannt",ex_cn:"放松一下。",ex_de:"Entspann dich.",tip:"4. Ton + 1. Ton."}
+  ]},
+  {block:23,title:"Bewertungen",color:"#9A5A9A",group:"Adjektive",words:[
+      {char:"安全",pinyin:"ānquán",de:"sicher",ex_cn:"这里很安全。",ex_de:"Hier ist es sicher.",tip:"1. Ton + 2. Ton."},
+      {char:"危险",pinyin:"wēixiǎn",de:"gefährlich",ex_cn:"太危险了！",ex_de:"Zu gefährlich!",tip:"1. Ton + 3. Ton."},
+      {char:"容易",pinyin:"róngyì",de:"einfach / leicht",ex_cn:"很容易。",ex_de:"Sehr einfach.",tip:"2. Ton + 4. Ton."},
+      {char:"难",pinyin:"nán",de:"schwer / schwierig",ex_cn:"中文很难。",ex_de:"Chinesisch ist schwer.",tip:"2. Ton — steigend wie eine Frage."},
+      {char:"干净",pinyin:"gānjìng",de:"sauber",ex_cn:"房间很干净。",ex_de:"Das Zimmer ist sauber.",tip:"1. Ton + 4. Ton."},
+      {char:"脏",pinyin:"zāng",de:"schmutzig",ex_cn:"手很脏。",ex_de:"Die Hände sind schmutzig.",tip:"1. Ton — hoch und gleichmäßig. Z = stimmhaftes Ds."},
+      {char:"重要",pinyin:"zhòngyào",de:"wichtig",ex_cn:"很重要！",ex_de:"Sehr wichtig!",tip:"4. Ton + 4. Ton. Zh ist retroflex — Zunge nach oben biegen."},
+      {char:"有趣",pinyin:"yǒuqù",de:"interessant",ex_cn:"这本书很有趣。",ex_de:"Dieses Buch ist interessant.",tip:"3. Ton + 4. Ton."},
+      {char:"无聊",pinyin:"wúliáo",de:"langweilig",ex_cn:"好无聊。",ex_de:"So langweilig.",tip:"2. Ton + 2. Ton."},
+      {char:"漂亮",pinyin:"piàoliang",de:"hübsch / schön",ex_cn:"好漂亮！",ex_de:"Wie schön!",tip:"4. Ton — scharf fallend."},
+      {char:"帅",pinyin:"shuài",de:"gutaussehend",ex_cn:"他很帅。",ex_de:"Er ist gutaussehend.",tip:"4. Ton — scharf fallend. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"好吃",pinyin:"hǎochī",de:"lecker (Essen)",ex_cn:"太好吃了！",ex_de:"So lecker!",tip:"3. Ton + 1. Ton. Ch ist retroflex — Zunge nach oben biegen."},
+      {char:"难吃",pinyin:"nánchī",de:"schlecht schmeckend",ex_cn:"有点难吃。",ex_de:"Schmeckt nicht so gut.",tip:"2. Ton + 1. Ton. Ch ist retroflex — Zunge nach oben biegen."},
+      {char:"正确",pinyin:"zhèngquè",de:"richtig / korrekt",ex_cn:"你说得正确。",ex_de:"Du hast recht.",tip:"4. Ton + 4. Ton. Zh ist retroflex — Zunge nach oben biegen."},
+      {char:"错误",pinyin:"cuòwù",de:"falsch / Fehler",ex_cn:"这是错误的。",ex_de:"Das ist falsch.",tip:"4. Ton + 4. Ton. C = scharfes Ts."},
+      {char:"一样",pinyin:"yīyàng",de:"gleich",ex_cn:"我们一样。",ex_de:"Wir sind gleich.",tip:"1. Ton + 4. Ton."},
+      {char:"不同",pinyin:"bùtóng",de:"anders / verschieden",ex_cn:"完全不同。",ex_de:"Ganz anders.",tip:"4. Ton + 2. Ton."},
+      {char:"真的",pinyin:"zhēnde",de:"echt / wirklich",ex_cn:"真的吗？",ex_de:"Wirklich?",tip:"1. Ton — hoch und gleichmäßig. Zh ist retroflex — Zunge nach oben biegen."},
+      {char:"假的",pinyin:"jiǎde",de:"gefälscht / falsch",ex_cn:"这是假的。",ex_de:"Das ist gefälscht.",tip:"3. Ton — erst tief, dann steigend. J klingt wie weiches dsch."},
+      {char:"没关系",pinyin:"méi guānxi",de:"macht nichts / kein Problem",ex_cn:"没关系！",ex_de:"Kein Problem!",tip:"2. Ton + 1. Ton."}
+  ]},
+  {block:24,title:"Zählwörter",color:"#5AADA0",group:"Extras",words:[
+      {char:"个",pinyin:"gè",de:"allgemein (Personen, Dinge)",ex_cn:"三个人。",ex_de:"Drei Personen.",tip:"4. Ton — scharf fallend."},
+      {char:"本",pinyin:"běn",de:"Bücher",ex_cn:"两本书。",ex_de:"Zwei Bücher.",tip:"3. Ton — erst tief, dann steigend."},
+      {char:"张",pinyin:"zhāng",de:"flache Dinge (Papier, Tickets)",ex_cn:"一张票。",ex_de:"Ein Ticket.",tip:"1. Ton — hoch und gleichmäßig. Zh ist retroflex — Zunge nach oben biegen."},
+      {char:"杯",pinyin:"bēi",de:"Tassen / Getränke",ex_cn:"一杯茶。",ex_de:"Eine Tasse Tee.",tip:"1. Ton — hoch und gleichmäßig."},
+      {char:"条",pinyin:"tiáo",de:"lange Dinge (Straßen, Fische)",ex_cn:"一条路。",ex_de:"Eine Straße.",tip:"2. Ton — steigend wie eine Frage."},
+      {char:"件",pinyin:"jiàn",de:"Kleidung, Angelegenheiten",ex_cn:"一件衣服。",ex_de:"Ein Kleidungsstück.",tip:"4. Ton — scharf fallend. J klingt wie weiches dsch."},
+      {char:"只",pinyin:"zhǐ",de:"nur",ex_cn:"一只猫。",ex_de:"Eine Katze.",tip:"3. Ton — erst tief, dann steigend. Zh ist retroflex — Zunge nach oben biegen."},
+      {char:"辆",pinyin:"liàng",de:"Fahrzeuge",ex_cn:"一辆车。",ex_de:"Ein Auto.",tip:"4. Ton — scharf fallend."},
+      {char:"次",pinyin:"cì",de:"Mal / Wiederholungen",ex_cn:"一次。",ex_de:"Ein Mal.",tip:"4. Ton — scharf fallend. C = scharfes Ts."}
+  ]},
+  {block:25,title:"Überlebensphrasen",color:"#4A9A90",group:"Extras",words:[
+      {char:"你好",pinyin:"nǐ hǎo",de:"Hallo",ex_cn:"你好！很高兴认识你。",ex_de:"Hallo! Freut mich.",tip:"3. Ton + 3. Ton."},
+      {char:"谢谢",pinyin:"xièxiè",de:"Danke",ex_cn:"谢谢你的帮助！",ex_de:"Danke für deine Hilfe!",tip:"4. Ton + 4. Ton. X klingt wie sch vor i."},
+      {char:"不客气",pinyin:"bù kèqì",de:"Bitte / Gern geschehen",ex_cn:"不客气！",ex_de:"Gern geschehen!",tip:"4. Ton + 4. Ton + 4. Ton."},
+      {char:"对不起",pinyin:"duìbuqǐ",de:"Entschuldigung",ex_cn:"对不起，我迟到了。",ex_de:"Sorry, ich bin zu spät.",tip:"4. Ton + 3. Ton."},
+      {char:"没关系",pinyin:"méi guānxi",de:"macht nichts / kein Problem",ex_cn:"没关系！",ex_de:"Kein Problem!",tip:"2. Ton + 1. Ton."},
+      {char:"请问",pinyin:"qǐngwèn",de:"Entschuldigung / darf ich fragen",ex_cn:"请问，地铁站在哪？",ex_de:"Entschuldigung, wo ist die U-Bahn?",tip:"3. Ton + 4. Ton. Q klingt wie tch vor i."},
+      {char:"听不懂",pinyin:"tīng bù dǒng",de:"Ich verstehe nicht",ex_cn:"对不起，我听不懂。",ex_de:"Sorry, ich verstehe nicht.",tip:"1. Ton + 4. Ton + 3. Ton."},
+      {char:"再说一遍",pinyin:"zài shuō yībiàn",de:"Bitte nochmal sagen",ex_cn:"请再说一遍。",ex_de:"Bitte nochmal sagen.",tip:"4. Ton + 1. Ton + 1. Ton + 4. Ton. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"慢一点",pinyin:"màn yīdiǎn",de:"Bitte langsamer",ex_cn:"请说慢一点。",ex_de:"Bitte langsamer sprechen.",tip:"4. Ton + 1. Ton + 3. Ton."},
+      {char:"我不会说中文",pinyin:"wǒ bù huì shuō zhōngwén",de:"Ich spreche kein Chinesisch",ex_cn:"对不起，我不会说中文。",ex_de:"Sorry, ich spreche kein Chinesisch.",tip:"3. Ton + 4. Ton + 4. Ton + 1. Ton + 1. Ton + 2. Ton. Zh/Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"用英文怎么说",pinyin:"yòng yīngwén zěnme shuō",de:"Wie sagt man das auf Englisch?",ex_cn:"这个用英文怎么说？",ex_de:"Wie sagt man das auf Englisch?",tip:"4. Ton + 1. Ton + 2. Ton + 3. Ton + 1. Ton. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"多少钱",pinyin:"duōshao qián",de:"Wie viel kostet das?",ex_cn:"这个多少钱？",ex_de:"Was kostet das?",tip:"1. Ton + 2. Ton. Sh ist retroflex — Zunge nach oben biegen."},
+      {char:"在哪里",pinyin:"zài nǎlǐ",de:"Wo ist das?",ex_cn:"厕所在哪里？",ex_de:"Wo ist die Toilette?",tip:"4. Ton + 3. Ton + 3. Ton. Z = stimmhaftes Ds."},
+      {char:"怎么走",pinyin:"zěnme zǒu",de:"Wie komme ich dahin?",ex_cn:"去地铁站怎么走？",ex_de:"Wie komme ich zur U-Bahn?",tip:"3. Ton + 3. Ton. Z = stimmhaftes Ds."},
+      {char:"可以帮我吗",pinyin:"kěyǐ bāng wǒ ma",de:"Kannst du mir helfen?",ex_cn:"你可以帮我吗？",ex_de:"Kannst du mir helfen?",tip:"3. Ton + 3. Ton + 1. Ton + 3. Ton."}
+  ]}
 ];
 
 // ── STORAGE ──
-const BK='putonghua_blocks_v2', RK='putonghua_results_v2';
-function loadBlocks(){
-  try{const s=localStorage.getItem(BK);if(s)return JSON.parse(s);}catch(e){}
-  localStorage.setItem(BK,JSON.stringify(SEED));return SEED;
-}
-function saveBlocks(b){localStorage.setItem(BK,JSON.stringify(b));}
-function loadResults(){try{return JSON.parse(localStorage.getItem(RK)||'{}');}catch(e){return {};}}
-function saveResults(r){localStorage.setItem(RK,JSON.stringify(r));}
+const RK = 'putonghua_results_v4';
+function loadResults() { try { return JSON.parse(localStorage.getItem(RK) || '{}'); } catch(e) { return {}; } }
+function saveResults(r) { localStorage.setItem(RK, JSON.stringify(r)); }
 
 // ── STATE ──
-let allBlocks=loadBlocks(), results=loadResults();
-let currentBlock=allBlocks[0]?.block??1, currentWord=null, recognition=null;
+// Blocks always come from SEED (code is the source of truth)
+let allBlocks = SEED;
+let results = loadResults();
+let currentBlockIdx = 0;
+let currentCardIdx = 0;
+let currentWord = null;
+let recognition = null;
+let isListening = false;
+let autoAdvanceTimer = null;
+let strictness = parseInt(localStorage.getItem('putonghua_strictness') || '0');
 
-// ── IMPORT ──
-function toggleImport(){
-  const p=document.getElementById('importPanel');
-  p.classList.toggle('open');
-  if(p.classList.contains('open')){
-    document.getElementById('importTextarea').value='';
-    document.getElementById('importMsg').style.display='none';
-  }
-}
-function doImport(){
-  const raw=document.getElementById('importTextarea').value.trim();
-  const msg=document.getElementById('importMsg');
-  msg.className='import-msg';
-  let parsed;
-  try{parsed=JSON.parse(raw);}catch(e){
-    msg.textContent='✗ Ungültiges JSON — bitte nochmal kopieren.';
-    msg.className='import-msg error';msg.style.display='inline';return;
-  }
-  if(!parsed.block||!parsed.title||!Array.isArray(parsed.words)){
-    msg.textContent='✗ Format falsch — block, title und words werden erwartet.';
-    msg.className='import-msg error';msg.style.display='inline';return;
-  }
-  const idx=allBlocks.findIndex(b=>b.block===parsed.block);
-  if(idx>=0)allBlocks[idx]=parsed; else allBlocks.push(parsed);
-  allBlocks.sort((a,b)=>a.block-b.block);
-  saveBlocks(allBlocks);
-  msg.textContent=`✓ Block ${parsed.block} mit ${parsed.words.length} Wörtern gespeichert!`;
-  msg.style.display='inline';
-  setTimeout(()=>{toggleImport();renderTabs();loadBlock(parsed.block);},1200);
-}
+// Strictness: 0=locker, 1=normal, 2=streng
+const STRICT_CONF = [0, 0.6, 0.85]; // min confidence thresholds
 
-// ── TABS ──
-function renderTabs(){
-  const c=document.getElementById('blockTabs');
-  c.innerHTML='';
-  allBlocks.forEach(bl=>{
-    const btn=document.createElement('button');
-    btn.className='block-tab'+(bl.block===currentBlock?' active':'');
-    btn.dataset.b=bl.block;
-    btn.textContent='Block '+bl.block;
-    if(bl.block===currentBlock){btn.style.background=bl.color;btn.style.color='#0e0e10';}
-    btn.addEventListener('click',()=>loadBlock(bl.block));
-    c.appendChild(btn);
+function setStrictness(level) {
+  strictness = level;
+  localStorage.setItem('putonghua_strictness', level);
+  document.querySelectorAll('.strict-seg').forEach(s => {
+    s.classList.toggle('active', parseInt(s.dataset.level) === level);
   });
+}
+
+function initStrictness() {
+  document.querySelectorAll('.strict-seg').forEach(s => {
+    s.classList.toggle('active', parseInt(s.dataset.level) === strictness);
+  });
+}
+
+// ── INIT ──
+function init() {
+  initTTS();
+  initSpeech();
+  initStrictness();
+  renderDropdown();
+  loadBlock(0);
+}
+
+// ── DROPDOWN ──
+function toggleDropdown() {
+  const dd = document.getElementById('setDropdown');
+  const ov = document.getElementById('dropOverlay');
+  const open = dd.classList.toggle('open');
+  ov.classList.toggle('open', open);
+}
+
+function renderDropdown() {
+  const dd = document.getElementById('setDropdown');
+  dd.innerHTML = '';
+  let lastGroup = '';
+  allBlocks.forEach((bl, i) => {
+    // Group header
+    if (bl.group && bl.group !== lastGroup) {
+      lastGroup = bl.group;
+      const hdr = document.createElement('div');
+      hdr.className = 'set-group-header';
+      hdr.textContent = bl.group;
+      dd.appendChild(hdr);
+    }
+    const done = Object.keys(results[bl.block] || {}).length;
+    const total = bl.words.length;
+    const item = document.createElement('div');
+    item.className = 'set-dropdown-item' + (i === currentBlockIdx ? ' active' : '');
+    item.innerHTML = `<span class="dot" style="background:${bl.color}"></span>
+      <span>${bl.title}</span>
+      <span class="count">${done}/${total}</span>`;
+    item.addEventListener('click', () => { toggleDropdown(); loadBlock(i); });
+    dd.appendChild(item);
+  });
+}
+
+function updateSetBtn() {
+  const bl = allBlocks[currentBlockIdx];
+  document.getElementById('setDot').style.background = bl.color;
+  document.getElementById('setLabel').textContent = bl.title;
 }
 
 // ── LOAD BLOCK ──
-function loadBlock(n){
-  currentBlock=n; currentWord=null;
-  document.querySelectorAll('.block-tab').forEach(t=>{
-    const b=allBlocks.find(b=>b.block===parseInt(t.dataset.b));
-    const active=parseInt(t.dataset.b)===n;
-    t.classList.toggle('active',active);
-    t.style.background=active?b.color:'';
-    t.style.color=active?'#0e0e10':'';
-  });
-  const bl=allBlocks.find(b=>b.block===n);
-  if(!bl)return;
-  const list=document.getElementById('wordList');
-  list.innerHTML='';
-  const br=results[n]||{};
-  bl.words.forEach((w,i)=>{
-    const chip=document.createElement('div');
-    chip.className='word-chip'+(br[i]==='correct'?' correct':br[i]==='wrong'?' wrong':'');
-    chip.innerHTML=`<div class="chip-char">${w.char}</div><div class="chip-pinyin">${w.pinyin}</div><div class="chip-de">${w.de}</div>`;
-    chip.addEventListener('click',()=>selectWord(i));
-    chip.addEventListener('dblclick',e=>{e.stopPropagation();speak(w.char);});
-    list.appendChild(chip);
-  });
+function loadBlock(idx) {
+  currentBlockIdx = idx;
+  currentCardIdx = 0;
+  const bl = allBlocks[idx];
+  if (!bl) return;
+  updateSetBtn();
+  renderDropdown();
+  showCard(0);
   updateProgress();
-  document.getElementById('trainer').innerHTML=`<div class="trainer-empty"><div class="arrow">👆</div><p>Wähle ein Wort, dann sprich es laut — ich überprüfe deine Aussprache.</p></div>`;
+  clearFeedback();
 }
 
-// ── SELECT WORD ──
-function selectWord(idx){
-  document.querySelectorAll('.word-chip').forEach((c,i)=>c.classList.toggle('selected',i===idx));
-  const bl=allBlocks.find(b=>b.block===currentBlock);
-  currentWord={idx,...bl.words[idx]};
-  const col=bl.color;
-  const w=currentWord;
-  document.getElementById('trainer').innerHTML=`
-    <div class="card-block-label" style="color:${col}">${bl.title} · Wort ${idx+1}</div>
-    <div class="card-char-big tts-char" id="ttsChar" title="Doppelklick zum Anhören">${w.char}<span class="tts-hint">👂 doppelklicken</span></div>
-    <div class="card-pinyin-big" style="color:${col}">${w.pinyin}</div>
-    <div class="card-de-big">${w.de}</div>
-    <div class="card-example"><strong>${w.ex_cn}</strong><br>${w.ex_de}</div>
-    <div class="tts-row">
-      <button class="tts-btn" id="ttsWord">🔊 Voraussprechen</button>
-      <button class="tts-btn" id="ttsSlow">🐢 Langsam</button>
-      <button class="tts-btn" id="ttsEx">💬 Beispiel</button>
-    </div>
-    <div class="mic-area">
-      <button class="mic-btn" id="micBtn" onclick="startListening()">🎙</button>
-      <div class="mic-label" id="micLabel">Klicken und sprechen</div>
-    </div>
-    <div class="feedback-area" id="feedbackArea"></div>`;
-  // Attach TTS listeners via JS (avoids Chinese char escaping in HTML attributes)
-  document.getElementById('ttsChar').addEventListener('dblclick', ()=>speak(w.char));
-  document.getElementById('ttsWord').addEventListener('click', ()=>speak(w.char));
-  document.getElementById('ttsSlow').addEventListener('click', ()=>slowSpeak(w.char));
-  document.getElementById('ttsEx').addEventListener('click',  ()=>speak(w.ex_cn));
-}
-
-// ── SPEECH ──
-function initSpeech(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){document.getElementById('warn').style.display='block';return false;}
-  recognition=new SR();recognition.lang='zh-CN';recognition.interimResults=false;recognition.maxAlternatives=3;
-  return true;
-}
-function startListening(){
-  if(!recognition&&!initSpeech())return;
-  const btn=document.getElementById('micBtn'),lbl=document.getElementById('micLabel');
-  btn.classList.add('listening');btn.textContent='⏹';btn.onclick=()=>recognition.stop();
-  lbl.textContent='Ich höre zu …';
-  recognition.start();
-  recognition.onresult=e=>handleResult(Array.from(e.results[0]).map(r=>r.transcript.trim()));
-  recognition.onerror=e=>{
-    resetMic();
-    const fa=document.getElementById('feedbackArea');
-    if(fa)fa.innerHTML=`<div class="ai-feedback"><span class="feedback-tag tag-retry">Fehler</span><br>Mikrofon-Fehler: ${e.error}. Bitte via <strong>localhost</strong> öffnen und Mikrofon erlauben.</div>`;
-  };
-  recognition.onend=()=>resetMic();
-}
-function resetMic(){
-  const btn=document.getElementById('micBtn'),lbl=document.getElementById('micLabel');
-  if(!btn)return;
-  btn.classList.remove('listening');btn.textContent='🎙';btn.onclick=startListening;lbl.textContent='Nochmal versuchen';
-}
-
-// ── FEEDBACK ──
-async function handleResult(alternatives){
-  const w=currentWord;if(!w)return;
-  const heard=alternatives[0]||'';
-  const clean=s=>s.replace(/[，。！？、\s]/g,'');
-  const match=alternatives.some(a=>clean(a)===clean(w.char));
-  document.getElementById('feedbackArea').innerHTML=`
-    <div class="heard-row">
-      <span class="heard-label">Gehört:</span>
-      <span class="heard-text">${heard||'(nichts erkannt)'}</span>
-      <span class="${match?'heard-match':'heard-miss'}">${match?'✓ Übereinstimmung':'✗ Abweichung'}</span>
-    </div>
-    <div class="ai-feedback loading" id="aiFeedback"><span class="feedback-tag tag-ai">KI-Analyse</span><br>Analysiere…</div>`;
-  if(!results[currentBlock])results[currentBlock]={};
-  results[currentBlock][w.idx]=match?'correct':'wrong';
-  saveResults(results);updateProgress();
-  const chips=document.querySelectorAll('.word-chip');
-  if(chips[w.idx]){chips[w.idx].classList.remove('correct','wrong');chips[w.idx].classList.add(match?'correct':'wrong');}
-  await getAiFeedback(heard,alternatives,match,w);
-}
-
-async function getAiFeedback(heard,alternatives,match,w){
-  const el=document.getElementById('aiFeedback');if(!el)return;
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:
-        `Du bist ein freundlicher Mandarin-Aussprache-Coach für einen deutschsprachigen Anfänger.\n\nZielwort: ${w.char} (${w.pinyin}) — Bedeutung: "${w.de}"\nAussprache-Tipp: ${w.tip}\nErkannte Eingabe: "${heard}"\nAlle Alternativen: ${alternatives.join(', ')}\nÜbereinstimmung: ${match?'JA':'NEIN'}\n\nGib eine kurze, ermutigende Rückmeldung auf Deutsch (max. 3 Sätze):\n1. Ob die Aussprache korrekt war oder wo genau sie abwich.\n2. Einen konkreten Tipp zu Ton oder Lautbildung für dieses Wort.\n3. Optional: wie das Wort im Familienkontext klingt oder wirkt.\nKeine langen Einleitungen.`
-      }]})
+// ── SHOW CARD ──
+function showCard(idx, direction) {
+  const bl = allBlocks[currentBlockIdx];
+  if (!bl || !bl.words[idx]) return;
+  
+  currentCardIdx = idx;
+  currentWord = bl.words[idx];
+  
+  const card = document.getElementById('card');
+  const w = currentWord;
+  
+  // Check if already practiced
+  const br = results[bl.block] || {};
+  const status = br[idx];
+  
+  // Animate direction
+  if (direction === 'left') {
+    card.className = 'card swipe-left';
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        renderCard(w, status);
+        card.className = 'card swipe-enter-left';
+      }, 150);
     });
-    const data=await res.json();
-    const text=data.content?.[0]?.text||'Kein Feedback erhalten.';
-    if(el){
-      el.classList.remove('loading');
-      const tl=match?'Sehr gut!':(heard?'Fast!':'Nochmal');
-      const tc=match?'tag-correct':(heard?'tag-close':'tag-retry');
-      el.innerHTML=`<span class="feedback-tag ${tc}">${tl}</span><br>${text}`;
-    }
-  }catch(e){
-    if(el){el.classList.remove('loading');el.innerHTML=`<span class="feedback-tag tag-ai">Offline</span><br>${match?'✓ Erkannt! ':'Abweichung. '}${w.tip}`;}
+  } else if (direction === 'right') {
+    card.className = 'card swipe-right';
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        renderCard(w, status);
+        card.className = 'card swipe-enter-right';
+      }, 150);
+    });
+  } else {
+    renderCard(w, status);
+    card.className = 'card';
+  }
+  
+  // Update counter & nav
+  document.getElementById('cardCounter').textContent = `${idx + 1} / ${bl.words.length}`;
+  document.getElementById('navPrev').disabled = idx <= 0;
+  document.getElementById('navNext').disabled = idx >= bl.words.length - 1;
+  
+  // Restart mic if already listening when card switches
+  const wasListening = isListening;
+  if (isListening) {
+    try { recognition.abort(); } catch(e) {}
+    isListening = false;
+  }
+  clearFeedback();
+  if (wasListening) {
+    setTimeout(() => startMic(), 300);
   }
 }
 
-function updateProgress(){
-  const bl=allBlocks.find(b=>b.block===currentBlock);
-  const total=bl.words.length,done=Object.keys(results[currentBlock]||{}).length;
-  const row=document.getElementById('progressRow');
-  row.style.display='flex';
-  document.getElementById('progressText').textContent=`${done} / ${total} geübt`;
-  document.getElementById('progressFill').style.width=Math.round(done/total*100)+'%';
+function renderCard(w, status) {
+  const card = document.getElementById('card');
+  const bl = allBlocks[currentBlockIdx];
+  const BLOCK_TINTS = {1:'#FAFAFA',2:'#F2F5F2',3:'#FDFAF2',4:'#F2F4F8'};
+  const tint = BLOCK_TINTS[bl.block] || '#FFFFFF';
+  let border = '';
+  if (status === 'correct') border = 'border-color: var(--green);';
+  if (status === 'wrong') border = 'border-color: var(--red);';
+  
+  card.style.cssText = `background:${tint};${border}`;
+  card.innerHTML = `
+    <span class="tap-hint">Anhören</span>
+    <div class="card-char">${w.char}</div>
+    <div class="card-pinyin">${w.pinyin}</div>
+    <div class="card-meaning">${w.de}</div>`;
 }
 
-// ── TEXT-TO-SPEECH ──
+// ── NAVIGATION ──
+function nextCard() {
+  const bl = allBlocks[currentBlockIdx];
+  if (currentCardIdx < bl.words.length - 1) {
+    showCard(currentCardIdx + 1, 'left');
+  }
+}
+function prevCard() {
+  if (currentCardIdx > 0) {
+    showCard(currentCardIdx - 1, 'right');
+  }
+}
+
+// ── SWIPE (touch + mouse for desktop testing) ──
+let touchStartX = 0, touchStartY = 0, touchDeltaX = 0, swiping = false;
+const cardArea = document.getElementById('cardArea');
+
+// Touch
+cardArea.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+  touchDeltaX = 0; swiping = true;
+}, { passive: true });
+
+cardArea.addEventListener('touchmove', e => {
+  if (!swiping) return;
+  const dx = e.touches[0].clientX - touchStartX;
+  const dy = e.touches[0].clientY - touchStartY;
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+    touchDeltaX = dx;
+    const card = document.getElementById('card');
+    card.style.transform = `translateX(${dx * 0.4}px) rotate(${dx * 0.02}deg)`;
+    card.style.transition = 'none';
+  }
+}, { passive: true });
+
+cardArea.addEventListener('touchend', () => {
+  if (!swiping) return;
+  swiping = false;
+  const card = document.getElementById('card');
+  card.style.transition = '';
+  card.style.transform = '';
+  if (touchDeltaX < -60) nextCard();
+  else if (touchDeltaX > 60) prevCard();
+});
+
+// Mouse (desktop testing)
+cardArea.addEventListener('mousedown', e => {
+  if (e.target.closest('.nav-arrow')) return; // don't hijack buttons
+  touchStartX = e.clientX;
+  touchDeltaX = 0; swiping = true;
+  e.preventDefault();
+});
+
+document.addEventListener('mousemove', e => {
+  if (!swiping) return;
+  const dx = e.clientX - touchStartX;
+  touchDeltaX = dx;
+  const card = document.getElementById('card');
+  card.style.transform = `translateX(${dx * 0.4}px) rotate(${dx * 0.02}deg)`;
+  card.style.transition = 'none';
+});
+
+document.addEventListener('mouseup', () => {
+  if (!swiping) return;
+  swiping = false;
+  const card = document.getElementById('card');
+  card.style.transition = '';
+  card.style.transform = '';
+  if (touchDeltaX < -60) nextCard();
+  else if (touchDeltaX > 60) prevCard();
+});
+
+// Click = speak (only if not a drag)
+cardArea.addEventListener('click', e => {
+  if (Math.abs(touchDeltaX) > 15) return; // was a drag, not a tap
+  if (e.target.closest('.nav-arrow')) return;
+  speakCurrent();
+});
+
+// ── TTS ──
 let ttsVoice = null;
 function initTTS() {
   const load = () => {
-    const voices = speechSynthesis.getVoices();
-    ttsVoice = voices.find(v=>v.lang==='zh-CN') || voices.find(v=>v.lang==='zh-TW') || voices.find(v=>v.lang.startsWith('zh')) || null;
+    const v = speechSynthesis.getVoices();
+    ttsVoice = v.find(x => x.lang === 'zh-CN') || v.find(x => x.lang === 'zh-TW') || v.find(x => x.lang.startsWith('zh')) || null;
   };
   load();
   speechSynthesis.onvoiceschanged = load;
 }
-function speak(text) {
+function speak(text, rate = 0.85) {
   if (!text) return;
   speechSynthesis.cancel();
-  const utt = new SpeechSynthesisUtterance(text);
-  utt.lang = 'zh-CN'; utt.rate = 0.8; utt.pitch = 1;
-  if (ttsVoice) utt.voice = ttsVoice;
-  speechSynthesis.speak(utt);
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'zh-CN'; u.rate = rate; u.pitch = 1;
+  if (ttsVoice) u.voice = ttsVoice;
+  speechSynthesis.speak(u);
+}
+function speakCurrent() { if (currentWord) speak(currentWord.char); }
+function speakSlow() { if (currentWord) speak(currentWord.char, 0.45); }
+function speakExample() { if (currentWord) speak(currentWord.ex_cn, 0.75); }
+
+// ── SPEECH RECOGNITION ──
+let micTimeout = null;
+const MIC_TIMEOUT_MS = 15000; // auto-stop after 15s idle (resets on each card/result)
+
+function initSpeech() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { document.getElementById('warn').style.display = 'block'; return false; }
+  recognition = new SR();
+  recognition.lang = 'zh-CN';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 3;
+  recognition.onresult = e => {
+    clearMicTimeout();
+    const alts = Array.from(e.results[0]).map(r => ({
+      text: r.transcript.trim(),
+      conf: r.confidence
+    }));
+    handleResult(alts);
+  };
+  recognition.onerror = e => {
+    clearMicTimeout();
+    // 'aborted' is expected when we force-stop — don't show error
+    if (e.error === 'aborted') { resetMic(); return; }
+    isListening = false;
+    resetMic();
+    showFeedback('error', `Mikrofon-Fehler: ${e.error}`);
+  };
+  recognition.onend = () => {
+    clearMicTimeout();
+    if (isListening) {
+      // iOS: auto-restart after each result to keep mic alive
+      try {
+        recognition.start();
+        micTimeout = setTimeout(() => {
+          if (isListening) stopMic();
+        }, MIC_TIMEOUT_MS);
+      } catch(e) {
+        isListening = false;
+        resetMic();
+      }
+    } else {
+      resetMic();
+    }
+  };
+  return true;
 }
 
-function slowSpeak(text) {
-  if (!text) return;
-  speechSynthesis.cancel();
-  const utt = new SpeechSynthesisUtterance(text);
-  utt.lang = 'zh-CN'; utt.rate = 0.5; utt.pitch = 1;
-  if (ttsVoice) utt.voice = ttsVoice;
-  speechSynthesis.speak(utt);
+function startMic() {
+  if (!recognition && !initSpeech()) return;
+  if (!currentWord) return;
+  
+  isListening = true;
+  const btn = document.getElementById('micBtn');
+  const lbl = document.getElementById('micLabel');
+  btn.classList.add('listening');
+  lbl.textContent = 'Ich höre zu …';
+  lbl.classList.add('active');
+  
+  try { 
+    recognition.start();
+    micTimeout = setTimeout(() => {
+      if (isListening) stopMic();
+    }, MIC_TIMEOUT_MS);
+  } catch(e) {
+    isListening = false;
+    resetMic();
+  }
 }
+
+function toggleMic() {
+  if (isListening) {
+    stopMic();
+    return;
+  }
+  startMic();
+}
+
+function stopMic() {
+  clearMicTimeout();
+  isListening = false; // set BEFORE abort so onend doesn't restart
+  if (recognition) {
+    try { recognition.abort(); } catch(e) {}
+  }
+  resetMic();
+}
+
+function clearMicTimeout() {
+  if (micTimeout) { clearTimeout(micTimeout); micTimeout = null; }
+}
+
+// ── STOP MIC ON TAB SWITCH / BLUR ──
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && isListening) stopMic();
+});
+window.addEventListener('blur', () => {
+  if (isListening) stopMic();
+});
+window.addEventListener('pagehide', () => {
+  if (isListening) stopMic();
+});
+
+function resetMic() {
+  const btn = document.getElementById('micBtn');
+  const lbl = document.getElementById('micLabel');
+  if (!btn) return;
+  btn.classList.remove('listening');
+  lbl.textContent = currentWord ? 'Tippe & sprich' : '';
+  lbl.classList.remove('active');
+}
+
+// ── HANDLE RESULT ──
+function handleResult(alts) {
+  const w = currentWord;
+  if (!w) return;
+  
+  const heard = alts[0]?.text || '';
+  const topConf = alts[0]?.conf || 0;
+  const clean = s => s.replace(/[，。！？、\s]/g, '');
+  const minConf = STRICT_CONF[strictness];
+  
+  let match = false;
+  if (strictness === 0) {
+    // Locker: any alternative matches
+    match = alts.some(a => clean(a.text) === clean(w.char));
+  } else if (strictness === 1) {
+    // Normal: first alternative must match + confidence > 0.6
+    match = clean(heard) === clean(w.char) && topConf >= minConf;
+  } else {
+    // Streng: first alternative only + confidence > 0.85
+    match = clean(heard) === clean(w.char) && topConf >= minConf;
+  }
+  
+  const bl = allBlocks[currentBlockIdx];
+  const card = document.getElementById('card');
+  const confPct = Math.round(topConf * 100);
+  
+  // Save result
+  if (!results[bl.block]) results[bl.block] = {};
+  results[bl.block][currentCardIdx] = match ? 'correct' : 'wrong';
+  saveResults(results);
+  updateProgress();
+  
+  // Flash card
+  card.classList.add(match ? 'flash-correct' : 'flash-wrong');
+  setTimeout(() => card.classList.remove('flash-correct', 'flash-wrong'), 500);
+  
+  if (match) {
+    showCorrectFeedback(heard, w, confPct);
+    autoAdvanceTimer = setTimeout(() => {
+      if (currentCardIdx < bl.words.length - 1) nextCard();
+    }, 2200);
+  } else {
+    const altTexts = alts.map(a => a.text);
+    showWrongFeedback(heard, altTexts, w, confPct);
+  }
+}
+
+function showCorrectFeedback(heard, w, confPct) {
+  const fa = document.getElementById('feedbackArea');
+  const confLabel = confPct > 0 ? `<span class="confidence-badge">${confPct}%</span>` : '';
+  fa.innerHTML = `
+    <div class="feedback-card correct">
+      <span class="feedback-tag tag-correct">✓ Richtig! ${confLabel}</span>
+      <div class="feedback-text">${w.tip}</div>
+      <div class="example-bonus" onclick="playExampleBonus(event)">
+        <span class="icon">▶</span>
+        <div class="label">
+          <strong>${w.ex_cn}</strong>
+          ${w.ex_de}
+        </div>
+      </div>
+    </div>`;
+}
+
+function showWrongFeedback(heard, alternatives, w, confPct) {
+  const fa = document.getElementById('feedbackArea');
+  const confLabel = confPct > 0 ? `<span class="confidence-badge">${confPct}%</span>` : '';
+  fa.innerHTML = `
+    <div class="feedback-card wrong">
+      <div class="feedback-heard">
+        Gehört: <span class="heard-char">${heard || '(nichts)'}</span> ${confLabel}
+      </div>
+      <span class="feedback-tag tag-retry">Nochmal</span>
+      <div class="feedback-text">${w.tip}</div>
+    </div>`;
+  getAiFeedback(heard, alternatives, w);
+}
+
+function playExampleBonus(e) {
+  e.stopPropagation();
+  // Cancel auto-advance since user is engaging
+  if (autoAdvanceTimer) clearTimeout(autoAdvanceTimer);
+  if (currentWord) speak(currentWord.ex_cn, 0.75);
+}
+
+function showFeedback(type, msg) {
+  const fa = document.getElementById('feedbackArea');
+  fa.innerHTML = `<div class="feedback-card"><span class="feedback-tag tag-retry">${type}</span><div class="feedback-text">${msg}</div></div>`;
+}
+
+function clearFeedback() {
+  if (autoAdvanceTimer) clearTimeout(autoAdvanceTimer);
+  document.getElementById('feedbackArea').innerHTML = '';
+}
+
+// ── AI FEEDBACK ──
+async function getAiFeedback(heard, alternatives, w) {
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514', max_tokens: 300,
+        messages: [{ role: 'user', content:
+          `Du bist ein freundlicher Mandarin-Coach für deutschsprachige Anfänger. Kurz und ermutigend!\n\nZielwort: ${w.char} (${w.pinyin}) — "${w.de}"\nErkannt: "${heard}"\nAlternativen: ${alternatives.join(', ')}\n\nGib 2 kurze Sätze: 1) Was war falsch? 2) Konkreter Tipp.`
+        }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '';
+    if (text) {
+      const fa = document.getElementById('feedbackArea');
+      const existing = fa.querySelector('.feedback-text');
+      if (existing) existing.innerHTML = text;
+    }
+  } catch(e) { /* Offline — tip already shown */ }
+}
+
+// ── PROGRESS ──
+function updateProgress() {
+  const bl = allBlocks[currentBlockIdx];
+  const total = bl.words.length;
+  const done = Object.keys(results[bl.block] || {}).length;
+  const pct = total > 0 ? done / total : 0;
+  
+  // Ring
+  const circ = 2 * Math.PI * 11; // ~69.12
+  const offset = circ * (1 - pct);
+  document.getElementById('progressRing').style.strokeDashoffset = offset;
+  document.getElementById('progressText').textContent = done;
+  
+  // Update dropdown counts
+  renderDropdown();
+}
+
+// ── SETTINGS / EXPORT / IMPORT ──
+function toggleSettings() {
+  const panel = document.getElementById('settingsPanel');
+  const open = panel.classList.toggle('open');
+  if (open) renderStats();
+}
+
+function renderStats() {
+  let lastGroup = '';
+  let html = '';
+  let totalDone = 0, totalWords = 0;
+  allBlocks.forEach(bl => {
+    if (bl.group !== lastGroup) {
+      lastGroup = bl.group;
+      html += `<div style="font-size:8px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-top:10px;margin-bottom:2px;">${bl.group}</div>`;
+    }
+    const br = results[bl.block] || {};
+    const done = Object.keys(br).length;
+    const correct = Object.values(br).filter(v => v === 'correct').length;
+    const total = bl.words.length;
+    totalDone += done; totalWords += total;
+    const pct = total > 0 ? Math.round(done / total * 100) : 0;
+    const bar = `<div style="flex:1;height:4px;background:var(--bg3);"><div style="height:4px;background:${pct===100?'var(--green)':'var(--text)'};width:${pct}%;"></div></div>`;
+    html += `<div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:11px;">
+      <span style="flex:1;font-weight:600;color:var(--text2);">${bl.title}</span>
+      ${bar}
+      <span style="font-family:'DM Mono';font-size:10px;color:var(--muted);min-width:36px;text-align:right;">${done}/${total}</span>
+    </div>`;
+  });
+  html = `<div style="font-weight:800;font-size:12px;margin-bottom:6px;"><strong>${totalDone}</strong> / ${totalWords} geübt</div>` + html;
+  document.getElementById('settingsStats').innerHTML = html;
+}
+
+function exportProgress() {
+  const data = JSON.stringify({ results, strictness, exported: new Date().toISOString() });
+  navigator.clipboard.writeText(data).then(() => {
+    showSettingsMsg('In Zwischenablage kopiert!');
+  }).catch(() => {
+    // Fallback: prompt
+    prompt('Kopiere diesen Text:', data);
+    showSettingsMsg('Manuell kopieren.');
+  });
+}
+
+function importProgress() {
+  const raw = prompt('Füge deinen exportierten Fortschritt ein:');
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    if (data.results) {
+      results = data.results;
+      saveResults(results);
+      if (data.strictness !== undefined) {
+        strictness = data.strictness;
+        localStorage.setItem('putonghua_strictness', strictness);
+        initStrictness();
+      }
+      updateProgress();
+      renderStats();
+      showSettingsMsg('Fortschritt importiert!');
+    } else {
+      showSettingsMsg('Ungültiges Format.', true);
+    }
+  } catch(e) {
+    showSettingsMsg('Ungültiges JSON.', true);
+  }
+}
+
+function resetProgress() {
+  if (!confirm('Gesamten Fortschritt löschen? Das kann nicht rückgängig gemacht werden.')) return;
+  results = {};
+  saveResults(results);
+  updateProgress();
+  renderStats();
+  showSettingsMsg('Fortschritt gelöscht.');
+}
+
+function showSettingsMsg(text, isError) {
+  const el = document.getElementById('settingsMsg');
+  el.textContent = text;
+  el.className = 'settings-msg' + (isError ? ' error' : '');
+  setTimeout(() => { el.textContent = ''; }, 3000);
+}
+
+// ── TONE GUIDE ──
+function toggleTones() {
+  const bar = document.getElementById('toneBar');
+  const arrow = document.getElementById('toneArrow');
+  const open = bar.classList.toggle('open');
+  arrow.textContent = open ? '▴' : '▾';
+}
+
+// ── KEYBOARD NAV ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft') prevCard();
+  else if (e.key === 'ArrowRight') nextCard();
+  else if (e.key === ' ') { e.preventDefault(); toggleMic(); }
+  else if (e.key === 'Enter') speakCurrent();
+});
 
 // ── BOOT ──
-initTTS(); initSpeech(); renderTabs(); loadBlock(currentBlock);
+init();
 </script>
 </body>
 </html>
