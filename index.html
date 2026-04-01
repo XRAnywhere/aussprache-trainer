@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>普通话 · Aussprache-Trainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=DM+Sans:wght@300;400;500&family=DM+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0e0e10; --bg2:#16161a; --bg3:#1e1e24;
+  --border:rgba(255,255,255,0.08); --text:#e8e6e0; --muted:#6b6975;
+  --accent:#c8a96e; --accent2:#8b6fd4;
+  --green:#5cb87a; --red:#e06b6b; --yellow:#e0c06b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+
+/* TOPBAR */
+.topbar{width:100%;display:flex;align-items:center;padding:16px 24px;border-bottom:1px solid var(--border);gap:10px;position:sticky;top:0;background:var(--bg);z-index:20;flex-wrap:wrap;}
+.topbar-logo{font-family:'Noto Serif SC',serif;font-size:20px;color:var(--accent);}
+.topbar-sub{font-size:11px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;}
+.block-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-left:auto;}
+.block-tab{padding:5px 13px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.block-tab:hover{border-color:rgba(255,255,255,.2);color:var(--text);}
+.block-tab.active{color:#0e0e10;font-weight:500;border-color:transparent;}
+.import-btn{padding:5px 13px;border-radius:20px;border:1px dashed rgba(255,255,255,.2);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.import-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* MAIN */
+.main{width:100%;max-width:860px;padding:28px 20px 60px;display:flex;flex-direction:column;align-items:center;gap:24px;}
+
+/* IMPORT PANEL */
+.import-panel{width:100%;background:var(--bg2);border:1px dashed rgba(200,169,110,.3);border-radius:16px;padding:24px;display:none;flex-direction:column;gap:14px;}
+.import-panel.open{display:flex;}
+.import-panel h3{font-size:13px;font-weight:500;color:var(--accent);}
+.import-panel p{font-size:12px;color:var(--muted);line-height:1.6;}
+.import-panel textarea{width:100%;height:120px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:12px;resize:vertical;}
+.import-panel textarea:focus{outline:none;border-color:rgba(200,169,110,.4);}
+.import-actions{display:flex;gap:10px;align-items:center;}
+.btn-primary{padding:8px 18px;background:var(--accent);color:#0e0e10;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.btn-primary:hover{opacity:.85;}
+.btn-ghost{padding:8px 18px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.btn-ghost:hover{color:var(--text);}
+.import-msg{font-size:12px;color:var(--green);display:none;}
+.import-msg.error{color:var(--red);}
+
+/* WORD LIST */
+.word-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px;width:100%;}
+.word-chip{border:1px solid var(--border);background:var(--bg2);border-radius:10px;padding:10px 8px;cursor:pointer;text-align:center;transition:all .2s;position:relative;overflow:hidden;}
+.word-chip:hover{border-color:rgba(255,255,255,.2);background:var(--bg3);}
+.word-chip.selected{border-color:var(--accent);background:rgba(200,169,110,.08);}
+.word-chip.correct::after{content:'✓';position:absolute;top:4px;right:6px;font-size:10px;color:var(--green);}
+.word-chip.wrong::after{content:'✗';position:absolute;top:4px;right:6px;font-size:10px;color:var(--red);}
+.chip-char{font-family:'Noto Serif SC',serif;font-size:22px;line-height:1.2;}
+.chip-pinyin{font-size:10px;color:var(--muted);margin-top:3px;font-family:'DM Mono',monospace;}
+.chip-de{font-size:10px;color:var(--muted);margin-top:2px;}
+
+/* PROGRESS */
+.progress-row{width:100%;display:none;align-items:center;gap:10px;font-size:12px;color:var(--muted);}
+.progress-track{flex:1;height:3px;background:var(--bg3);border-radius:2px;}
+.progress-fill{height:3px;border-radius:2px;background:var(--accent);transition:width .4s;}
+
+/* TRAINER CARD */
+.trainer{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:32px 28px 24px;display:flex;flex-direction:column;align-items:center;min-height:360px;}
+.trainer-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--muted);height:280px;}
+.trainer-empty .arrow{font-size:26px;}
+.trainer-empty p{font-size:14px;text-align:center;line-height:1.6;max-width:260px;}
+.card-block-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:18px;align-self:flex-start;}
+.card-char-big{font-family:'Noto Serif SC',serif;font-size:84px;line-height:1;margin-bottom:10px;text-align:center;}
+.card-pinyin-big{font-family:'DM Mono',monospace;font-size:21px;margin-bottom:5px;letter-spacing:.04em;}
+.card-de-big{font-size:15px;color:var(--muted);margin-bottom:28px;}
+.card-example{font-size:13px;color:var(--muted);text-align:center;line-height:1.8;margin-bottom:24px;padding:12px 18px;background:var(--bg3);border-radius:10px;border:1px solid var(--border);width:100%;}
+.card-example strong{color:var(--text);font-weight:400;}
+
+/* MIC */
+.mic-area{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;}
+.mic-btn{width:68px;height:68px;border-radius:50%;border:2px solid rgba(200,169,110,.4);background:rgba(200,169,110,.08);color:var(--accent);font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;position:relative;}
+.mic-btn:hover{background:rgba(200,169,110,.15);border-color:var(--accent);}
+.mic-btn.listening{background:rgba(200,169,110,.2);border-color:var(--accent);animation:pulse 1.2s ease-in-out infinite;}
+.mic-btn.listening::before{content:'';position:absolute;width:88px;height:88px;border-radius:50%;border:2px solid var(--accent);opacity:0;animation:ripple 1.2s ease-out infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(200,169,110,.3)}50%{box-shadow:0 0 0 10px rgba(200,169,110,0)}}
+@keyframes ripple{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.mic-label{font-size:12px;color:var(--muted);letter-spacing:.04em;}
+
+.tts-char{cursor:pointer;position:relative;}
+.tts-char:hover .tts-hint{opacity:1;}
+.tts-hint{position:absolute;bottom:-2px;right:-4px;font-size:10px;color:var(--muted);opacity:0;transition:opacity .2s;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.tts-row{display:flex;gap:8px;margin-bottom:20px;width:100%;}
+.tts-btn{flex:1;padding:8px 4px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.tts-btn:hover{border-color:rgba(255,255,255,.2);color:var(--text);background:var(--bg2);}
+.tts-btn:active{transform:scale(.97);}
+
+/* FEEDBACK */
+.feedback-area{width:100%;margin-top:18px;}
+.heard-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg3);border-radius:10px;border:1px solid var(--border);margin-bottom:10px;font-size:13px;}
+.heard-label{color:var(--muted);flex-shrink:0;}
+.heard-text{font-family:'Noto Serif SC',serif;font-size:17px;}
+.heard-match{color:var(--green);margin-left:auto;font-size:12px;font-weight:500;}
+.heard-miss{color:var(--red);margin-left:auto;font-size:12px;font-weight:500;}
+.ai-feedback{padding:14px 16px;background:var(--bg3);border-radius:12px;border:1px solid var(--border);font-size:13px;line-height:1.8;color:var(--text);min-height:54px;}
+.ai-feedback.loading::after{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);animation:blink 1s step-end infinite;margin-left:6px;vertical-align:middle;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.feedback-tag{display:inline-block;font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:20px;margin-bottom:6px;}
+.tag-correct{background:rgba(92,184,122,.15);color:var(--green);}
+.tag-close{background:rgba(224,192,107,.15);color:var(--yellow);}
+.tag-retry{background:rgba(224,107,107,.15);color:var(--red);}
+.tag-ai{background:rgba(139,111,212,.15);color:var(--accent2);}
+
+/* TONE GUIDE */
+.tone-guide{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:18px 22px;}
+.tone-guide h3{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.tones{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.tone-item{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;}
+.tone-num{font-size:10px;color:var(--muted);margin-bottom:3px;}
+.tone-sym{font-family:'Noto Serif SC',serif;font-size:22px;color:var(--accent);line-height:1;margin-bottom:3px;}
+.tone-desc{font-size:10px;color:var(--muted);line-height:1.4;}
+
+.browser-warn{background:rgba(224,192,107,.08);border:1px solid rgba(224,192,107,.3);border-radius:10px;padding:12px 16px;font-size:12px;color:var(--yellow);width:100%;display:none;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-logo">普通话</div>
+    <div class="topbar-sub">Aussprache-Trainer</div>
+  </div>
+  <div class="block-tabs" id="blockTabs"></div>
+  <button class="import-btn" onclick="toggleImport()">＋ Block importieren</button>
+</div>
+
+<div class="main">
+  <div class="browser-warn" id="warn">⚠️ Spracherkennung funktioniert nur in Chrome oder Edge — bitte dort öffnen (via localhost).</div>
+
+  <div class="import-panel" id="importPanel">
+    <h3>Neuen Block importieren</h3>
+    <p>Füge hier den JSON-Block ein, den du von Claude erhalten hast. Er wird dauerhaft gespeichert und erscheint als neuer Tab — auch nach dem Schließen des Browsers.</p>
+    <textarea id="importTextarea" placeholder='{"block":5,"title":"Block 5 · Gefühle","color":"#378ADD","words":[{"char":"开心","pinyin":"Kāixīn","de":"Fröhlich","ex_cn":"你开心吗？","ex_de":"Bist du fröhlich?","tip":"1. + 1. Ton. ..."}]}'></textarea>
+    <div class="import-actions">
+      <button class="btn-primary" onclick="doImport()">Importieren</button>
+      <button class="btn-ghost"   onclick="toggleImport()">Abbrechen</button>
+      <span class="import-msg" id="importMsg"></span>
+    </div>
+  </div>
+
+  <div class="word-list"    id="wordList"></div>
+  <div class="progress-row" id="progressRow">
+    <span id="progressText">0 / 0 geübt</span>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+  <div class="trainer" id="trainer">
+    <div class="trainer-empty">
+      <div class="arrow">👆</div>
+      <p>Wähle ein Wort, dann sprich es laut — ich überprüfe deine Aussprache.</p>
+    </div>
+  </div>
+
+  <div class="tone-guide">
+    <h3>Die 4 Töne des Mandarin</h3>
+    <div class="tones">
+      <div class="tone-item"><div class="tone-num">1. Ton</div><div class="tone-sym">ā</div><div class="tone-desc">Hoch &amp; gleichmäßig</div></div>
+      <div class="tone-item"><div class="tone-num">2. Ton</div><div class="tone-sym">á</div><div class="tone-desc">Steigend, wie Frage</div></div>
+      <div class="tone-item"><div class="tone-num">3. Ton</div><div class="tone-sym">ǎ</div><div class="tone-desc">Erst tief, dann hoch</div></div>
+      <div class="tone-item"><div class="tone-num">4. Ton</div><div class="tone-sym">à</div><div class="tone-desc">Scharf fallend</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── SEED DATA ──
+const SEED=[
+  {block:1,title:"Block 1 · Begrüßungen",color:"#9b8fd4",words:[
+    {char:"你好",pinyin:"Nǐ hǎo",de:"Hallo",ex_cn:"你好！",ex_de:"Hallo!",tip:"Beide 3. Ton — in der Praxis klingt 你 wie 2. Ton vor einem weiteren 3. Ton."},
+    {char:"谢谢",pinyin:"Xièxie",de:"Danke",ex_cn:"谢谢你！",ex_de:"Danke dir!",tip:"4. Ton + neutraler Ton. Die zweite Silbe ist kurz und flach."},
+    {char:"再见",pinyin:"Zàijiàn",de:"Tschüss",ex_cn:"再见！",ex_de:"Tschüss!",tip:"Beide 4. Ton (fallend). Kurz und bestimmt."},
+    {char:"请",pinyin:"Qǐng",de:"Bitte",ex_cn:"请坐。",ex_de:"Bitte setz dich.",tip:"3. Ton, fallend-steigend. Das Q wird wie weiches Ch ausgesprochen."},
+    {char:"对不起",pinyin:"Duìbuqǐ",de:"Entschuldigung",ex_cn:"对不起！",ex_de:"Entschuldigung!",tip:"4. + neutral + 3. Ton. Die mittlere Silbe bu ist sehr kurz."},
+    {char:"没关系",pinyin:"Méiguānxi",de:"Macht nichts",ex_cn:"没关系！",ex_de:"Macht nichts!",tip:"2. + 1. + neutral. Ein freundlicher, beruhigender Klang."},
+    {char:"好",pinyin:"Hǎo",de:"Gut / Okay",ex_cn:"好，好的！",ex_de:"Gut, alles klar!",tip:"3. Ton. Fällt zunächst tief, dann wieder hoch."},
+    {char:"不",pinyin:"Bù",de:"Nein / Nicht",ex_cn:"不好。",ex_de:"Nicht gut.",tip:"Normalerweise 4. Ton — vor einem weiteren 4. Ton wird er zu 2. Ton."},
+    {char:"是",pinyin:"Shì",de:"Ja / Ist",ex_cn:"是的。",ex_de:"Ja, genau.",tip:"4. Ton, scharf fallend. Das Sh ist retroflexiv — Zunge nach oben biegen."},
+    {char:"我",pinyin:"Wǒ",de:"Ich",ex_cn:"我很好。",ex_de:"Mir geht's gut.",tip:"3. Ton. In schneller Sprache oft nur kurz tief."},
+    {char:"你",pinyin:"Nǐ",de:"Du",ex_cn:"你好吗？",ex_de:"Wie geht's dir?",tip:"3. Ton, fallend-steigend. Klingt fast wie knee mit Fragezeichen."},
+    {char:"很好",pinyin:"Hěn hǎo",de:"Sehr gut",ex_cn:"很好，谢谢！",ex_de:"Sehr gut, danke!",tip:"Beide 3. Ton — der erste wird meist zum 2. Ton: hén hǎo. Tonsandhi!"},
+    {char:"早上好",pinyin:"Zǎoshang hǎo",de:"Guten Morgen",ex_cn:"早上好！",ex_de:"Guten Morgen!",tip:"3. + neutral + 3. Ton. Zǎo allein ist informell für Morgen."},
+    {char:"晚上好",pinyin:"Wǎnshang hǎo",de:"Guten Abend",ex_cn:"晚上好！",ex_de:"Guten Abend!",tip:"3. + neutral + 3. Ton. Formeller als 你好."},
+  ]},
+  {block:2,title:"Block 2 · Familie",color:"#5cb8a0",words:[
+    {char:"爸爸",pinyin:"Bàba",de:"Papa",ex_cn:"爸爸来了！",ex_de:"Papa kommt!",tip:"4. + neutral. Bà-ba, die zweite Silbe fast unhörbar tief."},
+    {char:"妈妈",pinyin:"Māma",de:"Mama",ex_cn:"妈妈在哪？",ex_de:"Wo ist Mama?",tip:"1. + neutral. Hoch und gleichmäßig gehalten, dann abklingen."},
+    {char:"爷爷",pinyin:"Yéye",de:"Opa (väterl.)",ex_cn:"爷爷好！",ex_de:"Hallo Opa!",tip:"2. + neutral. Steigend wie eine Frage — dann loslassen."},
+    {char:"奶奶",pinyin:"Nǎinai",de:"Oma (väterl.)",ex_cn:"奶奶好！",ex_de:"Hallo Oma!",tip:"3. + neutral. Das erste nǎi fällt und steigt, das zweite ist kurz flach."},
+    {char:"姥姥",pinyin:"Lǎolao",de:"Oma (mütterl.)",ex_cn:"姥姥做的！",ex_de:"Oma hat das gemacht!",tip:"3. + neutral. Das L ist wie im Deutschen."},
+    {char:"姥爷",pinyin:"Lǎoye",de:"Opa (mütterl.)",ex_cn:"姥爷来了。",ex_de:"Opa kommt.",tip:"3. + neutral. Entspannter Klang — der zweite Teil fast geflüstert."},
+    {char:"哥哥",pinyin:"Gēge",de:"Großer Bruder",ex_cn:"哥哥在哪？",ex_de:"Wo ist der große Bruder?",tip:"1. + neutral. Hohes gleichmäßiges Ge, dann kurzes neutrales ge."},
+    {char:"姐姐",pinyin:"Jiějie",de:"Große Schwester",ex_cn:"姐姐帮我！",ex_de:"Schwester, hilf mir!",tip:"3. + neutral. Das J ist wie ein weiches Dsch."},
+    {char:"弟弟",pinyin:"Dìdi",de:"Kleiner Bruder",ex_cn:"弟弟来玩！",ex_de:"Komm spielen, Bruder!",tip:"4. + neutral. Scharf fallend, dann kurz neutral."},
+    {char:"妹妹",pinyin:"Mèimei",de:"Kleine Schwester",ex_cn:"妹妹好可爱！",ex_de:"Die kleine Schwester ist süß!",tip:"4. + neutral. Mei fällt scharf, dann kurzer neutraler Nachklang."},
+    {char:"宝宝",pinyin:"Bǎobao",de:"Baby / Kleines",ex_cn:"宝宝乖！",ex_de:"Braves Kleines!",tip:"3. + neutral. Liebevoll — der erste Teil steigt, dann loslassen."},
+    {char:"孩子",pinyin:"Háizi",de:"Kind",ex_cn:"孩子们！",ex_de:"Kinder!",tip:"2. + neutral. Steigend auf hái, dann kurzes zi fast wie dz."},
+    {char:"家",pinyin:"Jiā",de:"Familie / Zuhause",ex_cn:"回家了！",ex_de:"Wir gehen nach Hause!",tip:"1. Ton, hoch und klar gehalten. Jia — kein deutsches Ja!"},
+    {char:"我们",pinyin:"Wǒmen",de:"Wir",ex_cn:"我们一起！",ex_de:"Wir zusammen!",tip:"3. + neutral. Wǒ fällt-steigt, men ist kurz und flach."},
+  ]},
+  {block:3,title:"Block 3 · Essen",color:"#e08b6b",words:[
+    {char:"好吃",pinyin:"Hǎochī",de:"Lecker (Essen)",ex_cn:"好吃！谢谢！",ex_de:"Lecker! Danke!",tip:"3. + 1. Ton. Chī mit retroflexem Ch — Zunge nach oben wie englisch church."},
+    {char:"好喝",pinyin:"Hǎohē",de:"Lecker (Trinken)",ex_cn:"好喝！",ex_de:"Das schmeckt gut!",tip:"3. + 1. Ton. Hē ist einfach — wie deutsches He mit langem hohem Vokal."},
+    {char:"饿了",pinyin:"È le",de:"Hungrig",ex_cn:"我饿了！",ex_de:"Ich bin hungrig!",tip:"4. + neutral. È ist ein offenes Ä, das scharf fällt. Le zeigt Zustandsänderung."},
+    {char:"饱了",pinyin:"Bǎo le",de:"Satt",ex_cn:"我饱了，谢谢！",ex_de:"Ich bin satt, danke!",tip:"3. + neutral. Bǎo fällt und steigt. Sehr nützlich beim Familienessen!"},
+    {char:"吃饭",pinyin:"Chī fàn",de:"Essen (Mahlzeit)",ex_cn:"吃饭了！",ex_de:"Zeit zum Essen!",tip:"1. + 4. Ton. Wörtlich Reis essen — bedeutet aber jede Mahlzeit."},
+    {char:"喝",pinyin:"Hē",de:"Trinken",ex_cn:"喝水！",ex_de:"Trink Wasser!",tip:"1. Ton, hoch gehalten. Einfachstes Wort im Block — perfekt für den 1. Ton."},
+    {char:"水",pinyin:"Shuǐ",de:"Wasser",ex_cn:"喝水吧。",ex_de:"Trink etwas Wasser.",tip:"3. Ton. Das Sh ist retroflex — uǐ klingt wie wei mit fallendem Glide."},
+    {char:"茶",pinyin:"Chá",de:"Tee",ex_cn:"喝茶吗？",ex_de:"Möchtest du Tee?",tip:"2. Ton, steigend. Chá — retroflex Ch, dann steigender a-Laut."},
+    {char:"米饭",pinyin:"Mǐfàn",de:"Reis",ex_cn:"吃米饭！",ex_de:"Iss Reis!",tip:"3. + 4. Ton. Mǐ (ungeschliffener Reis) + fàn (Mahlzeit). Kurz und klar."},
+    {char:"菜",pinyin:"Cài",de:"Gemüse / Gericht",ex_cn:"多吃菜。",ex_de:"Iss mehr Gemüse.",tip:"4. Ton. Das C ist ein scharfes Ts — wie in Zar. Nicht K!"},
+    {char:"多吃点",pinyin:"Duō chī diǎn",de:"Iss noch etwas",ex_cn:"多吃点！",ex_de:"Komm, iss noch etwas!",tip:"1. + 1. + 3. Ton. Freundliche Aufforderung — perfekt für Familienessen."},
+    {char:"够了",pinyin:"Gòu le",de:"Genug / Reicht",ex_cn:"够了，谢谢！",ex_de:"Genug, danke!",tip:"4. + neutral. Gòu fällt scharf. Sehr wichtig um höflich abzulehnen!"},
+    {char:"筷子",pinyin:"Kuàizi",de:"Stäbchen",ex_cn:"用筷子吗？",ex_de:"Benutzt du Stäbchen?",tip:"4. + neutral. Das Ku hat kein deutsches Äquivalent — Lippen mehr runden."},
+    {char:"来，吃",pinyin:"Lái, chī",de:"Komm, iss",ex_cn:"来，吃吧！",ex_de:"Komm, iss!",tip:"2. + 1. Ton. Ein freundlicher Ruf — steigend, dann hoch gehalten."},
+  ]},
+  {block:4,title:"Block 4 · Kinder & Spielen",color:"#c8a96e",words:[
+    {char:"玩",pinyin:"Wán",de:"Spielen",ex_cn:"我们去玩！",ex_de:"Lass uns spielen!",tip:"2. Ton, steigend — kurz und energisch."},
+    {char:"小心",pinyin:"Xiǎoxīn",de:"Vorsicht!",ex_cn:"小心！",ex_de:"Pass auf!",tip:"3. + 1. Ton. Xiǎo fällt-steigt, xīn hoch halten. X wie Sch vor i."},
+    {char:"真棒",pinyin:"Zhēn bàng",de:"Super! Toll!",ex_cn:"真棒！",ex_de:"Super!",tip:"1. + 4. Ton. Retroflex Zh wie Dsch. Bàng fällt scharf — voller Begeisterung!"},
+    {char:"好玩",pinyin:"Hǎowán",de:"Spaßig / lustig",ex_cn:"好玩吗？",ex_de:"Macht das Spaß?",tip:"3. + 2. Ton. Fällt-steigt, dann steigt — eine schöne Melodie."},
+    {char:"一起",pinyin:"Yīqǐ",de:"Zusammen",ex_cn:"一起玩！",ex_de:"Zusammen spielen!",tip:"1. + 3. Ton. Yī hoch gehalten, qǐ fällt-steigt. Q wie Ch vor i."},
+    {char:"快点",pinyin:"Kuài diǎn",de:"Schnell!",ex_cn:"快点！",ex_de:"Schnell!",tip:"4. + 3. Ton. Scharf fallend, dann fällt-steigt. Energisch!"},
+    {char:"不要",pinyin:"Bùyào",de:"Lass das! / Nicht!",ex_cn:"不要！",ex_de:"Lass das!",tip:"4. + 4. Ton — aber 不 wird zu 2. Ton: bú yào. Tonsandhi!"},
+    {char:"停",pinyin:"Tíng",de:"Stopp!",ex_cn:"停！",ex_de:"Stopp!",tip:"2. Ton, steigend. Kurz und scharf — Zunge an den oberen Zähnen."},
+    {char:"帮我",pinyin:"Bāng wǒ",de:"Hilf mir",ex_cn:"帮我！妈妈！",ex_de:"Hilf mir! Mama!",tip:"1. + 3. Ton. Bāng hoch halten, dann wǒ fällt-steigt."},
+    {char:"看！",pinyin:"Kàn!",de:"Schau! Guck!",ex_cn:"你看！",ex_de:"Schau mal!",tip:"4. Ton — scharf und kurz fallend. Kinder sagen das ständig!"},
+    {char:"跑",pinyin:"Pǎo",de:"Rennen!",ex_cn:"快跑！",ex_de:"Lauf schnell!",tip:"3. Ton. Fällt tief, dann wieder hoch. Das P ist stark aspiriert."},
+    {char:"起来",pinyin:"Qǐlái",de:"Aufstehen",ex_cn:"起来！",ex_de:"Aufstehen!",tip:"3. + 2. Ton. Fällt-steigt, dann steigt — klingt fast wie eine Frage."},
+    {char:"洗手",pinyin:"Xǐshǒu",de:"Hände waschen",ex_cn:"洗手了！",ex_de:"Hände waschen!",tip:"3. + 3. Ton — der erste wird zu 2. Ton: xíshǒu. Tonsandhi!"},
+    {char:"上厕所",pinyin:"Shàng cèsuǒ",de:"Zur Toilette",ex_cn:"去上厕所吗？",ex_de:"Musst du auf die Toilette?",tip:"4. + 4. + 3. Ton. Das C ist Ts, Sh retroflex. Schritt für Schritt üben."},
+  ]},
+];
+
+// ── STORAGE ──
+const BK='putonghua_blocks_v2', RK='putonghua_results_v2';
+function loadBlocks(){
+  try{const s=localStorage.getItem(BK);if(s)return JSON.parse(s);}catch(e){}
+  localStorage.setItem(BK,JSON.stringify(SEED));return SEED;
+}
+function saveBlocks(b){localStorage.setItem(BK,JSON.stringify(b));}
+function loadResults(){try{return JSON.parse(localStorage.getItem(RK)||'{}');}catch(e){return {};}}
+function saveResults(r){localStorage.setItem(RK,JSON.stringify(r));}
+
+// ── STATE ──
+let allBlocks=loadBlocks(), results=loadResults();
+let currentBlock=allBlocks[0]?.block??1, currentWord=null, recognition=null;
+
+// ── IMPORT ──
+function toggleImport(){
+  const p=document.getElementById('importPanel');
+  p.classList.toggle('open');
+  if(p.classList.contains('open')){
+    document.getElementById('importTextarea').value='';
+    document.getElementById('importMsg').style.display='none';
+  }
+}
+function doImport(){
+  const raw=document.getElementById('importTextarea').value.trim();
+  const msg=document.getElementById('importMsg');
+  msg.className='import-msg';
+  let parsed;
+  try{parsed=JSON.parse(raw);}catch(e){
+    msg.textContent='✗ Ungültiges JSON — bitte nochmal kopieren.';
+    msg.className='import-msg error';msg.style.display='inline';return;
+  }
+  if(!parsed.block||!parsed.title||!Array.isArray(parsed.words)){
+    msg.textContent='✗ Format falsch — block, title und words werden erwartet.';
+    msg.className='import-msg error';msg.style.display='inline';return;
+  }
+  const idx=allBlocks.findIndex(b=>b.block===parsed.block);
+  if(idx>=0)allBlocks[idx]=parsed; else allBlocks.push(parsed);
+  allBlocks.sort((a,b)=>a.block-b.block);
+  saveBlocks(allBlocks);
+  msg.textContent=`✓ Block ${parsed.block} mit ${parsed.words.length} Wörtern gespeichert!`;
+  msg.style.display='inline';
+  setTimeout(()=>{toggleImport();renderTabs();loadBlock(parsed.block);},1200);
+}
+
+// ── TABS ──
+function renderTabs(){
+  const c=document.getElementById('blockTabs');
+  c.innerHTML='';
+  allBlocks.forEach(bl=>{
+    const btn=document.createElement('button');
+    btn.className='block-tab'+(bl.block===currentBlock?' active':'');
+    btn.dataset.b=bl.block;
+    btn.textContent='Block '+bl.block;
+    if(bl.block===currentBlock){btn.style.background=bl.color;btn.style.color='#0e0e10';}
+    btn.addEventListener('click',()=>loadBlock(bl.block));
+    c.appendChild(btn);
+  });
+}
+
+// ── LOAD BLOCK ──
+function loadBlock(n){
+  currentBlock=n; currentWord=null;
+  document.querySelectorAll('.block-tab').forEach(t=>{
+    const b=allBlocks.find(b=>b.block===parseInt(t.dataset.b));
+    const active=parseInt(t.dataset.b)===n;
+    t.classList.toggle('active',active);
+    t.style.background=active?b.color:'';
+    t.style.color=active?'#0e0e10':'';
+  });
+  const bl=allBlocks.find(b=>b.block===n);
+  if(!bl)return;
+  const list=document.getElementById('wordList');
+  list.innerHTML='';
+  const br=results[n]||{};
+  bl.words.forEach((w,i)=>{
+    const chip=document.createElement('div');
+    chip.className='word-chip'+(br[i]==='correct'?' correct':br[i]==='wrong'?' wrong':'');
+    chip.innerHTML=`<div class="chip-char">${w.char}</div><div class="chip-pinyin">${w.pinyin}</div><div class="chip-de">${w.de}</div>`;
+    chip.addEventListener('click',()=>selectWord(i));
+    chip.addEventListener('dblclick',e=>{e.stopPropagation();speak(w.char);});
+    list.appendChild(chip);
+  });
+  updateProgress();
+  document.getElementById('trainer').innerHTML=`<div class="trainer-empty"><div class="arrow">👆</div><p>Wähle ein Wort, dann sprich es laut — ich überprüfe deine Aussprache.</p></div>`;
+}
+
+// ── SELECT WORD ──
+function selectWord(idx){
+  document.querySelectorAll('.word-chip').forEach((c,i)=>c.classList.toggle('selected',i===idx));
+  const bl=allBlocks.find(b=>b.block===currentBlock);
+  currentWord={idx,...bl.words[idx]};
+  const col=bl.color;
+  const w=currentWord;
+  document.getElementById('trainer').innerHTML=`
+    <div class="card-block-label" style="color:${col}">${bl.title} · Wort ${idx+1}</div>
+    <div class="card-char-big tts-char" id="ttsChar" title="Doppelklick zum Anhören">${w.char}<span class="tts-hint">👂 doppelklicken</span></div>
+    <div class="card-pinyin-big" style="color:${col}">${w.pinyin}</div>
+    <div class="card-de-big">${w.de}</div>
+    <div class="card-example"><strong>${w.ex_cn}</strong><br>${w.ex_de}</div>
+    <div class="tts-row">
+      <button class="tts-btn" id="ttsWord">🔊 Voraussprechen</button>
+      <button class="tts-btn" id="ttsSlow">🐢 Langsam</button>
+      <button class="tts-btn" id="ttsEx">💬 Beispiel</button>
+    </div>
+    <div class="mic-area">
+      <button class="mic-btn" id="micBtn" onclick="startListening()">🎙</button>
+      <div class="mic-label" id="micLabel">Klicken und sprechen</div>
+    </div>
+    <div class="feedback-area" id="feedbackArea"></div>`;
+  // Attach TTS listeners via JS (avoids Chinese char escaping in HTML attributes)
+  document.getElementById('ttsChar').addEventListener('dblclick', ()=>speak(w.char));
+  document.getElementById('ttsWord').addEventListener('click', ()=>speak(w.char));
+  document.getElementById('ttsSlow').addEventListener('click', ()=>slowSpeak(w.char));
+  document.getElementById('ttsEx').addEventListener('click',  ()=>speak(w.ex_cn));
+}
+
+// ── SPEECH ──
+function initSpeech(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){document.getElementById('warn').style.display='block';return false;}
+  recognition=new SR();recognition.lang='zh-CN';recognition.interimResults=false;recognition.maxAlternatives=3;
+  return true;
+}
+function startListening(){
+  if(!recognition&&!initSpeech())return;
+  const btn=document.getElementById('micBtn'),lbl=document.getElementById('micLabel');
+  btn.classList.add('listening');btn.textContent='⏹';btn.onclick=()=>recognition.stop();
+  lbl.textContent='Ich höre zu …';
+  recognition.start();
+  recognition.onresult=e=>handleResult(Array.from(e.results[0]).map(r=>r.transcript.trim()));
+  recognition.onerror=e=>{
+    resetMic();
+    const fa=document.getElementById('feedbackArea');
+    if(fa)fa.innerHTML=`<div class="ai-feedback"><span class="feedback-tag tag-retry">Fehler</span><br>Mikrofon-Fehler: ${e.error}. Bitte via <strong>localhost</strong> öffnen und Mikrofon erlauben.</div>`;
+  };
+  recognition.onend=()=>resetMic();
+}
+function resetMic(){
+  const btn=document.getElementById('micBtn'),lbl=document.getElementById('micLabel');
+  if(!btn)return;
+  btn.classList.remove('listening');btn.textContent='🎙';btn.onclick=startListening;lbl.textContent='Nochmal versuchen';
+}
+
+// ── FEEDBACK ──
+async function handleResult(alternatives){
+  const w=currentWord;if(!w)return;
+  const heard=alternatives[0]||'';
+  const clean=s=>s.replace(/[，。！？、\s]/g,'');
+  const match=alternatives.some(a=>clean(a)===clean(w.char));
+  document.getElementById('feedbackArea').innerHTML=`
+    <div class="heard-row">
+      <span class="heard-label">Gehört:</span>
+      <span class="heard-text">${heard||'(nichts erkannt)'}</span>
+      <span class="${match?'heard-match':'heard-miss'}">${match?'✓ Übereinstimmung':'✗ Abweichung'}</span>
+    </div>
+    <div class="ai-feedback loading" id="aiFeedback"><span class="feedback-tag tag-ai">KI-Analyse</span><br>Analysiere…</div>`;
+  if(!results[currentBlock])results[currentBlock]={};
+  results[currentBlock][w.idx]=match?'correct':'wrong';
+  saveResults(results);updateProgress();
+  const chips=document.querySelectorAll('.word-chip');
+  if(chips[w.idx]){chips[w.idx].classList.remove('correct','wrong');chips[w.idx].classList.add(match?'correct':'wrong');}
+  await getAiFeedback(heard,alternatives,match,w);
+}
+
+async function getAiFeedback(heard,alternatives,match,w){
+  const el=document.getElementById('aiFeedback');if(!el)return;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:
+        `Du bist ein freundlicher Mandarin-Aussprache-Coach für einen deutschsprachigen Anfänger.\n\nZielwort: ${w.char} (${w.pinyin}) — Bedeutung: "${w.de}"\nAussprache-Tipp: ${w.tip}\nErkannte Eingabe: "${heard}"\nAlle Alternativen: ${alternatives.join(', ')}\nÜbereinstimmung: ${match?'JA':'NEIN'}\n\nGib eine kurze, ermutigende Rückmeldung auf Deutsch (max. 3 Sätze):\n1. Ob die Aussprache korrekt war oder wo genau sie abwich.\n2. Einen konkreten Tipp zu Ton oder Lautbildung für dieses Wort.\n3. Optional: wie das Wort im Familienkontext klingt oder wirkt.\nKeine langen Einleitungen.`
+      }]})
+    });
+    const data=await res.json();
+    const text=data.content?.[0]?.text||'Kein Feedback erhalten.';
+    if(el){
+      el.classList.remove('loading');
+      const tl=match?'Sehr gut!':(heard?'Fast!':'Nochmal');
+      const tc=match?'tag-correct':(heard?'tag-close':'tag-retry');
+      el.innerHTML=`<span class="feedback-tag ${tc}">${tl}</span><br>${text}`;
+    }
+  }catch(e){
+    if(el){el.classList.remove('loading');el.innerHTML=`<span class="feedback-tag tag-ai">Offline</span><br>${match?'✓ Erkannt! ':'Abweichung. '}${w.tip}`;}
+  }
+}
+
+function updateProgress(){
+  const bl=allBlocks.find(b=>b.block===currentBlock);
+  const total=bl.words.length,done=Object.keys(results[currentBlock]||{}).length;
+  const row=document.getElementById('progressRow');
+  row.style.display='flex';
+  document.getElementById('progressText').textContent=`${done} / ${total} geübt`;
+  document.getElementById('progressFill').style.width=Math.round(done/total*100)+'%';
+}
+
+// ── TEXT-TO-SPEECH ──
+let ttsVoice = null;
+function initTTS() {
+  const load = () => {
+    const voices = speechSynthesis.getVoices();
+    ttsVoice = voices.find(v=>v.lang==='zh-CN') || voices.find(v=>v.lang==='zh-TW') || voices.find(v=>v.lang.startsWith('zh')) || null;
+  };
+  load();
+  speechSynthesis.onvoiceschanged = load;
+}
+function speak(text) {
+  if (!text) return;
+  speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'zh-CN'; utt.rate = 0.8; utt.pitch = 1;
+  if (ttsVoice) utt.voice = ttsVoice;
+  speechSynthesis.speak(utt);
+}
+
+function slowSpeak(text) {
+  if (!text) return;
+  speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'zh-CN'; utt.rate = 0.5; utt.pitch = 1;
+  if (ttsVoice) utt.voice = ttsVoice;
+  speechSynthesis.speak(utt);
+}
+
+// ── BOOT ──
+initTTS(); initSpeech(); renderTabs(); loadBlock(currentBlock);
+</script>
+</body>
+</html>
